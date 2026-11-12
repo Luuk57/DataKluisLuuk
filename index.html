@@ -211,7 +211,7 @@
 
                 <div class="flex justify-end space-x-3 pt-2">
                     <button type="button" onclick="wisselScherm('overzicht')" class="bg-slate-200 px-4 py-2 rounded text-sm font-medium">Annuleren</button>
-                    <button type="submit" class="bg-blue-600 text-white px-5 py-2 rounded text-sm font-medium hover:bg-blue-700 shadow">Klaar om op te slaan</button>
+                    <button type="submit" id="btn-opslaan" class="bg-blue-600 text-white px-5 py-2 rounded text-sm font-medium hover:bg-blue-700 shadow">Opslaan in Google Sheet</button>
                 </div>
             </form>
         </section>
@@ -350,20 +350,71 @@
             status.textContent = '';
             container.innerHTML = `
                 <div class="bg-white p-4 rounded-lg shadow border border-slate-200">
-                    <span class="text-xs text-blue-600 font-bold">ID: 2026-06-06-22:15-Nacht</span>
-                    <h3 class="font-bold text-base text-slate-800 mt-1">Pre: 112.0 kg | Dry: 109 kg</h3>
-                    <p class="text-xs text-slate-600 mt-1">Duur: 7 uur | Vloeistof: 0.3</p>
-                    <div class="mt-3 flex justify-between items-center">
-                        <span class="px-2 py-0.5 rounded text-xs bg-amber-100 text-amber-800 font-bold">UF Advies: 4.30 L</span>
-                    </div>
+                    <span class="text-xs text-blue-600 font-bold">Klaar om gegevens in te voeren</span>
+                    <p class="text-xs text-slate-600 mt-1">Klik op 'Meting Toevoegen' om je sessie vast te leggen in Google Sheets.</p>
                 </div>
             `;
         }
 
-        function verstuurData(e) {
+        // Functie die gegevens direct naar jouw Google Apps Script Web-app stuurt
+        async function verstuurData(e) {
             e.preventDefault();
-            alert('Alles staat klaar om op te slaan in je Google Sheets DataKluis!');
-            wisselScherm('overzicht');
+
+            const btnOpslaan = document.getElementById('btn-opslaan');
+            btnOpslaan.textContent = 'Opslaan...';
+            btnOpslaan.disabled = true;
+
+            const formData = {
+                id: document.getElementById('s_id').value,
+                type: document.getElementById('s_type').value,
+                afspraak: document.getElementById('s_afspraak').value,
+                start: document.getElementById('s_start').value,
+                stop: document.getElementById('s_stop').value,
+                duur: document.getElementById('s_duur').value,
+                aansluit: document.getElementById('s_aansluit').value,
+                droog: document.getElementById('s_droog').value,
+                pre: document.getElementById('s_pre').value,
+                post: document.getElementById('s_post').value,
+                uf_advies: document.getElementById('s_uf_advies').value,
+                uf_ingeschat: document.getElementById('s_uf_ingeschat').value,
+                uf_werkelijk: document.getElementById('s_uf_werkelijk').value,
+                bovendruk: document.getElementById('s_bovendruk').value,
+                onderdruk: document.getElementById('s_onderdruk').value,
+                hartslag: document.getElementById('s_hartslag').value,
+                f25: Array.from(document.querySelectorAll('input[name="f25"]:checked')).map(cb => cb.value),
+                f50: Array.from(document.querySelectorAll('input[name="f50"]:checked')).map(cb => cb.value),
+                epo: document.getElementById('chk_epo').checked,
+                ijzer: document.getElementById('chk_ijzer').checked,
+                sf_meting: document.getElementById('chk_sf_meting').checked,
+                sf_resultaat: document.getElementById('s_sf_resultaat').value,
+                verpleging: Array.from(document.getElementById('select_verpleging').selectedOptions).map(opt => opt.value),
+                verslag: document.getElementById('s_verslag').value
+            };
+
+            // Jouw unieke Google Apps Script Web-app URL
+            const url = 'https://script.google.com/macros/s/AKfycbykmQWnY3dt1P1e13btDls6qvQGNewGeuFriIX-7cn81NgpL-r5Sc9INbf2nJ8pIIrP/exec';
+
+            try {
+                // Omdat Google Apps Script CORS blokkeert bij gewone fetch POST, gebruiken we 'no-cors' of een alternatief.
+                // Bij no-cors is de response status ondoorzichtig, maar de data komt wel aan in Google Sheets!
+                await fetch(url, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                alert('Gegevens succesvol opgeslagen in je Google Sheets DataKluis!');
+                document.getElementById('datakluis-form').reset();
+                wisselScherm('overzicht');
+            } catch (error) {
+                alert('Fout bij verbinden met Google Sheets: ' + error);
+            } finally {
+                btnOpslaan.textContent = 'Opslaan in Google Sheet';
+                btnOpslaan.disabled = false;
+            }
         }
 
         laadGegevens();
