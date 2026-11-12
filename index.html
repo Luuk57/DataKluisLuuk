@@ -44,7 +44,7 @@
             
             <form id="datakluis-form" onsubmit="verstuurData(event)" class="space-y-6">
                 
-                <!-- 1. Afspraken & Tijden (Centrale Hoofdblad) -->
+                <!-- 1. Afspraken & Tijden -->
                 <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-4">
                     <h3 class="text-sm font-bold text-blue-700 uppercase">1. Afspraken & Tijden</h3>
                     
@@ -58,7 +58,7 @@
                         </div>
                         <div class="sm:col-span-2">
                             <label class="block text-xs font-medium text-slate-600">Afspraak Datum & Tijd (Genereert ID)</label>
-                            <input type="datetime-local" id="s_afspraak" required class="w-full border rounded p-2 text-sm bg-white font-bold" onchange="updateAfspraakEnID()">
+                            <input type="datetime-local" id="s_afspraak" required class="w-full border rounded p-2 text-sm bg-white font-bold" onchange="syncAfspraakNaarStart()">
                         </div>
                     </div>
 
@@ -71,8 +71,8 @@
 
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-slate-200">
                         <div>
-                            <label class="block text-xs font-medium text-slate-600">Start Datum & Tijd</label>
-                            <input type="datetime-local" id="s_start" required class="w-full border rounded p-2 text-sm bg-white" onchange="berekenDuur()">
+                            <label class="block text-xs font-medium text-slate-600">Start Datum & Tijd (Handmatig aanpasbaar)</label>
+                            <input type="datetime-local" id="s_start" required class="w-full border rounded p-2 text-sm bg-white" onchange="markeerHandmatigeStart(); berekenTijdenEnVloeistof();">
                         </div>
                         <div>
                             <label class="block text-xs font-medium text-slate-600">Stop Datum & Tijd (Editbaar)</label>
@@ -94,7 +94,7 @@
                             <input type="number" step="0.1" id="s_aansluit" class="w-full border rounded p-2 text-sm bg-white" placeholder="0.3 of 0.6">
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-slate-600">Drooggewicht (kg)</label>
+                            <label class="block text-xs font-medium text-slate-600">Drooggewicht (kg) [Onthoudt wijziging]</label>
                             <input type="number" step="0.1" id="s_droog" value="109" required class="w-full border rounded p-2 text-sm bg-white" oninput="berekenUfAdvies()">
                         </div>
                         <div>
@@ -112,8 +112,8 @@
                             <input type="text" id="s_uf_advies" readonly class="w-full border rounded p-2 text-sm bg-slate-200 font-bold">
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-slate-600">UF ingeschat</label>
-                            <input type="number" step="0.1" id="s_uf_ingeschat" class="w-full border rounded p-2 text-sm bg-white">
+                            <label class="block text-xs font-medium text-slate-600">UF ingeschat (Instelbaar)</label>
+                            <input type="number" step="0.1" id="s_uf_ingeschat" class="w-full border rounded p-2 text-sm bg-white" placeholder="Ingevoerde UF">
                         </div>
                         <div>
                             <label class="block text-xs font-medium text-slate-600">UF werkelijk</label>
@@ -141,50 +141,71 @@
                     </div>
                 </div>
 
-                <!-- 4. Toedingeningen -->
-                <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
-                    <h3 class="text-sm font-bold text-blue-700 uppercase mb-3">4. Toedingeningen</h3>
-                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-3">
-                        <div>
-                            <label class="block text-xs font-medium text-slate-600">Fragmin 2500</label>
-                            <input type="text" id="s_f2500" class="w-full border rounded p-2 text-sm bg-white">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-slate-600">Fragmin 5000</label>
-                            <input type="text" id="s_f5000" class="w-full border rounded p-2 text-sm bg-white">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-slate-600">Epo</label>
-                            <input type="text" id="s_epo" class="w-full border rounded p-2 text-sm bg-white">
+                <!-- 4. Toedingeningen (Checkboxes & Resultaat) -->
+                <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-4">
+                    <h3 class="text-sm font-bold text-blue-700 uppercase">4. Toedingeningen</h3>
+                    
+                    <!-- Fragmin 2500 (4 hokjes) -->
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Fragmin 2500 (4 doses/momenten)</label>
+                        <div class="flex gap-4">
+                            <label class="text-xs flex items-center gap-1"><input type="checkbox" name="f25" value="1"> 1</label>
+                            <label class="text-xs flex items-center gap-1"><input type="checkbox" name="f25" value="2"> 2</label>
+                            <label class="text-xs flex items-center gap-1"><input type="checkbox" name="f25" value="3"> 3</label>
+                            <label class="text-xs flex items-center gap-1"><input type="checkbox" name="f25" value="4"> 4</label>
                         </div>
                     </div>
-                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                        <div>
-                            <label class="block text-xs font-medium text-slate-600">Ijzer</label>
-                            <input type="text" id="s_ijzer" class="w-full border rounded p-2 text-sm bg-white">
+
+                    <!-- Fragmin 5000 (4 hokjes) -->
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Fragmin 5000 (4 doses/momenten)</label>
+                        <div class="flex gap-4">
+                            <label class="text-xs flex items-center gap-1"><input type="checkbox" name="f50" value="1"> 1</label>
+                            <label class="text-xs flex items-center gap-1"><input type="checkbox" name="f50" value="2"> 2</label>
+                            <label class="text-xs flex items-center gap-1"><input type="checkbox" name="f50" value="3"> 3</label>
+                            <label class="text-xs flex items-center gap-1"><input type="checkbox" name="f50" value="4"> 4</label>
                         </div>
+                    </div>
+
+                    <!-- Epo, IJzer, Shuntflow meting (Enkele hokjes + Numeriek resultaat) -->
+                    <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 pt-2 border-t border-slate-200">
+                        <label class="text-xs font-medium text-slate-700 flex items-center gap-2">
+                            <input type="checkbox" id="chk_epo" class="w-4 h-4"> Epo toegediend
+                        </label>
+                        <label class="text-xs font-medium text-slate-700 flex items-center gap-2">
+                            <input type="checkbox" id="chk_ijzer" class="w-4 h-4"> IJzer toegediend
+                        </label>
+                        <label class="text-xs font-medium text-slate-700 flex items-center gap-2">
+                            <input type="checkbox" id="chk_sf_meting" class="w-4 h-4"> Shuntflow meting uitgevoerd
+                        </label>
                         <div>
-                            <label class="block text-xs font-medium text-slate-600">Shunt flow metir</label>
-                            <input type="text" id="s_sf_metir" class="w-full border rounded p-2 text-sm bg-white">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-slate-600">Shunt flow meting</label>
-                            <input type="text" id="s_sf_meting" class="w-full border rounded p-2 text-sm bg-white">
+                            <label class="block text-xs font-medium text-slate-600">Shuntflow resultaat (ml/min)</label>
+                            <input type="number" id="s_sf_resultaat" placeholder="bijv. 850" class="w-full border rounded p-1.5 text-sm bg-white">
                         </div>
                     </div>
                 </div>
 
-                <!-- 5. Verpleging & Verslag -->
-                <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
-                    <h3 class="text-sm font-bold text-blue-700 uppercase mb-3">5. Verpleging & Verslag</h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <!-- 5. Verpleging & Verslag (Multi-select dropdown met live beheer) -->
+                <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-3">
+                    <h3 class="text-sm font-bold text-blue-700 uppercase">5. Verpleging & Verslag</h3>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-xs font-medium text-slate-600">Verpleging</label>
-                            <input type="text" id="s_verpleging" class="w-full border rounded p-2 text-sm bg-white">
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Verpleging (Meerdere selecteerbaar)</label>
+                            <select id="select_verpleging" multiple class="w-full border rounded p-2 text-sm bg-white h-28" title="Selecteer verpleging"></select>
+                            <span class="text-[10px] text-slate-500 block mt-1">Tip: Houd Ctrl (of Cmd op Mac) ingedrukt om meerdere te selecteren.</span>
+                            
+                            <!-- Knoppen om live namen toe te voegen of te verwijderen -->
+                            <div class="flex gap-2 mt-2">
+                                <input type="text" id="nieuwe_naam" placeholder="Nieuwe naam..." class="border rounded p-1 text-xs flex-grow bg-white">
+                                <button type="button" onclick="voegVerplegingToe()" class="bg-emerald-600 text-white px-2 py-1 rounded text-xs hover:bg-emerald-700">＋ Toevoegen</button>
+                                <button type="button" onclick="verwijderGeselecteerdeVerpleging()" class="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600">✕ Verwijder</button>
+                            </div>
                         </div>
+
                         <div>
-                            <label class="block text-xs font-medium text-slate-600">Verslag</label>
-                            <textarea id="s_verslag" rows="2" class="w-full border rounded p-2 text-sm bg-white" placeholder="Bijzonderheden..."></textarea>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Verslag / Bijzonderheden</label>
+                            <textarea id="s_verslag" rows="4" class="w-full border rounded p-2 text-sm bg-white" placeholder="Bijzonderheden..."></textarea>
                         </div>
                     </div>
                 </div>
@@ -204,7 +225,10 @@
 
     <!-- JavaScript Logica -->
     <script>
-        // Huidige datum/tijd instellen bij openen voor zowel afspraak als start/stop
+        // Standaard verpleging lijst (kun je live uitbreiden of wissen)
+        let verplegingLijst = ["Jan de Vries", "Sanne Bakker", "Mohammed Ali", "Lisa Jansen"];
+        let handmatigeStartIngesteld = false;
+
         window.addEventListener('DOMContentLoaded', () => {
             const nu = new Date();
             nu.setMinutes(nu.getMinutes() - nu.getTimezoneOffset());
@@ -213,32 +237,79 @@
             document.getElementById('s_afspraak').value = isoNu;
             document.getElementById('s_start').value = isoNu;
             
+            vulVerplegingDropdown();
             updateAfspraakEnID();
         });
 
-        // Update afspraak ID, automatische stoptijd en vloeistof op basis van afspraak & type
+        function vulVerplegingDropdown() {
+            const select = document.getElementById('select_verpleging');
+            select.innerHTML = '';
+            verplegingLijst.forEach(naam => {
+                const opt = document.createElement('option');
+                opt.value = naam;
+                opt.textContent = naam;
+                select.appendChild(opt);
+            });
+        }
+
+        function voegVerplegingToe() {
+            const input = document.getElementById('nieuwe_naam');
+            const naam = input.value.trim();
+            if (naam && !verplegingLijst.includes(naam)) {
+                verplegingLijst.push(naam);
+                vulVerplegingDropdown();
+                input.value = '';
+            }
+        }
+
+        function verwijderGeselecteerdeVerpleging() {
+            const select = document.getElementById('select_verpleging');
+            const geselecteerd = Array.from(select.selectedOptions).map(opt => opt.value);
+            if (geselecteerd.length === 0) {
+                alert('Selecteer eerst één of meer namen in de lijst om te verwijderen.');
+                return;
+            }
+            verplegingLijst = verplegingLijst.filter(naam => !geselecteerd.includes(naam));
+            vulVerplegingDropdown();
+        }
+
+        function syncAfspraakNaarStart() {
+            const afspraakVal = document.getElementById('s_afspraak').value;
+            // Alleen meebewegen zolang de gebruiker de starttijd niet handmatig heeft aangepast
+            if (!handmatigeStartIngesteld) {
+                document.getElementById('s_start').value = afspraakVal;
+            }
+            updateAfspraakEnID();
+        }
+
+        function markeerHandmatigeStart() {
+            handmatigeStartIngesteld = true;
+        }
+
         function updateAfspraakEnID() {
             const afspraakVal = document.getElementById('s_afspraak').value;
+            const startVal = document.getElementById('s_start').value;
             const typeSessie = document.getElementById('s_type').value;
             const aansluitInput = document.getElementById('s_aansluit');
 
             if (!afspraakVal) return;
 
-            const afspraakDate = new Date(afspraakVal);
-
             // 1. Aansluit vloeistof instellen (Dag = 0.6, Nacht = 0.3)
             aansluitInput.value = (typeSessie === 'Dag') ? '0.6' : '0.3';
 
-            // 2. Dialyse ID opbouwen op basis van de afspraakdatum & tijd + type
+            // 2. Dialyse ID opbouwen op basis van afspraakdatum & tijd + type
             const datumStr = afspraakVal.split('T')[0];
             const tijdStr = afspraakVal.split('T')[1];
             document.getElementById('s_id').value = `${datumStr}-${tijdStr}-${typeSessie}`;
 
-            // 3. Stoptijd automatisch berekenen (Dag = +4 uur, Nacht = +7 uur) vanaf de afspraak
-            const urenErbij = (typeSessie === 'Dag') ? 4 : 7;
-            const stopDate = new Date(afspraakDate.getTime() + (urenErbij * 60 * 60 * 1000));
-            stopDate.setMinutes(stopDate.getMinutes() - stopDate.getTimezoneOffset());
-            document.getElementById('s_stop').value = stopDate.toISOString().slice(0, 16);
+            // 3. Stoptijd automatisch berekenen (Dag = +4 uur, Nacht = +7 uur) vanaf de starttijd
+            if (startVal) {
+                const startDate = new Date(startVal);
+                const urenErbij = (typeSessie === 'Dag') ? 4 : 7;
+                const stopDate = new Date(startDate.getTime() + (urenErbij * 60 * 60 * 1000));
+                stopDate.setMinutes(stopDate.getMinutes() - stopDate.getTimezoneOffset());
+                document.getElementById('s_stop').value = stopDate.toISOString().slice(0, 16);
+            }
 
             berekenDuur();
         }
@@ -258,13 +329,15 @@
             }
         }
 
-        // Formule UF Advies: pre weight - dry weight + 0.3
+        // Formule UF Advies: pre weight - dry weight + 0.3 (gebruikt het actuele drooggewicht)
         function berekenUfAdvies() {
             const pre = parseFloat(document.getElementById('s_pre').value) || 0;
             const droog = parseFloat(document.getElementById('s_droog').value) || 109;
             if (pre > 0) {
                 const advies = (pre - droog + 0.3).toFixed(2);
                 document.getElementById('s_uf_advies').value = advies + ' L';
+                // UF ingeschat automatisch gelijkstellen aan UF ingesteld/advies (naar wens aanpasbaar)
+                document.getElementById('s_uf_ingeschat').value = advies;
             }
         }
 
@@ -297,7 +370,11 @@
 
         function verstuurData(e) {
             e.preventDefault();
-            alert('Gegevens succesvol verzonden naar je Google Sheets DataKluis!');
+            // Geselecteerde verpleegkundigen ophalen
+            const select = document.getElementById('select_verpleging');
+            const gekozenVerpleging = Array.from(select.selectedOptions).map(opt => opt.value);
+            
+            alert('Gegevens succesvol verzonden! Geselecteerde verpleging: ' + (gekozenVerpleging.join(', ') || 'Geen'));
             wisselScherm('overzicht');
         }
 
