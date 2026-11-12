@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DataKluis - Dialyse Dashboard</title>
-    <!-- Tailwind CSS voor responsive design op PC, Laptop, Tablet en Telefoon -->
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-100 min-h-screen flex flex-col">
@@ -15,7 +14,7 @@
             <h1 class="text-xl font-bold">DataKluis • Dialyse Luuk</h1>
             <div class="flex flex-wrap gap-2 mt-2 sm:mt-0">
                 <button onclick="wisselScherm('overzicht')" id="btn-overzicht" class="px-3 py-1.5 rounded bg-blue-900 text-sm font-medium">Overzicht</button>
-                <button onclick="wisselScherm('invoer')" id="btn-invoer" class="px-3 py-1.5 rounded hover:bg-blue-600 text-sm font-medium">Nieuwe Meting</button>
+                <button onclick="nieuweMetingFormulier()" id="btn-invoer" class="px-3 py-1.5 rounded hover:bg-blue-600 text-sm font-medium">Nieuwe Meting</button>
             </div>
         </div>
     </nav>
@@ -27,19 +26,19 @@
         <section id="scherm-overzicht" class="space-y-6">
             <div class="flex justify-between items-center">
                 <h2 class="text-2xl font-semibold text-slate-800">Behandelingen Overzicht</h2>
-                <button onclick="wisselScherm('invoer')" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700">＋ Meting Toevoegen</button>
+                <button onclick="nieuweMetingFormulier()" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700">＋ Meting Toevoegen</button>
             </div>
 
             <div id="status-melding" class="text-slate-500 italic">Gegevens ophalen uit Google Sheets...</div>
             
             <div id="sessie-lijst" class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                <!-- Data wordt hier dynamisch ingeladen -->
+                <!-- Dynamische data blokken -->
             </div>
         </section>
 
-        <!-- SCHERM 2: INVOER -->
+        <!-- SCHERM 2: INVOER / BEWERKEN -->
         <section id="scherm-invoer" class="hidden max-w-3xl mx-auto bg-white p-6 md:p-8 rounded-xl shadow-md border border-slate-200">
-            <h2 class="text-2xl font-semibold text-slate-800 mb-2">Nieuwe Sessie Invoeren</h2>
+            <h2 id="form-titel" class="text-2xl font-semibold text-slate-800 mb-2">Nieuwe Sessie Invoeren</h2>
             <p class="text-xs text-slate-500 mb-6">Alle velden zijn optioneel. Gekoppeld aan je Google Sheets tabbladen.</p>
             
             <form id="datakluis-form" onsubmit="verstuurData(event)" class="space-y-6">
@@ -112,7 +111,7 @@
                             <input type="text" id="s_uf_advies" readonly class="w-full border rounded p-2 text-sm bg-slate-200 font-bold">
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-slate-600">UF ingeschat (Instelbaar)</label>
+                            <label class="block text-xs font-medium text-slate-600">UF ingeschat</label>
                             <input type="number" step="0.1" id="s_uf_ingeschat" class="w-full border rounded p-2 text-sm bg-white" placeholder="Ingevoerde UF">
                         </div>
                         <div>
@@ -186,7 +185,6 @@
                         <div>
                             <label class="block text-xs font-medium text-slate-600 mb-1">Verpleging (Meerdere selecteerbaar)</label>
                             <select id="select_verpleging" multiple class="w-full border rounded p-2 text-sm bg-white h-28" title="Selecteer verpleging"></select>
-                            <span class="text-[10px] text-slate-500 block mt-1">Houd Ctrl/Cmd ingedrukt voor meerdere.</span>
                             <div class="flex gap-2 mt-2">
                                 <input type="text" id="nieuwe_naam" placeholder="Nieuwe naam..." class="border rounded p-1 text-xs flex-grow bg-white">
                                 <button type="button" onclick="voegVerplegingToe()" class="bg-emerald-600 text-white px-2 py-1 rounded text-xs hover:bg-emerald-700">＋ Toevoegen</button>
@@ -217,20 +215,26 @@
     <script>
         let verplegingLijst = ["Jan de Vries", "Sanne Bakker", "Mohammed Ali", "Lisa Jansen"];
         let handmatigeStartIngesteld = false;
+        let alleSessiesData = []; // Slaat de opgehaalde data lokaal op
         const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbykmQWnY3dt1P1e13btDls6qvQGNewGeuFriIX-7cn81NgpL-r5Sc9INbf2nJ8pIIrP/exec';
 
         window.addEventListener('DOMContentLoaded', () => {
+            vulVerplegingDropdown();
+            laadGegevens();
+        });
+
+        function nieuweMetingFormulier() {
+            document.getElementById('datakluis-form').reset();
+            document.getElementById('form-titel').textContent = 'Nieuwe Sessie Invoeren';
             const nu = new Date();
             nu.setMinutes(nu.getMinutes() - nu.getTimezoneOffset());
             const isoNu = nu.toISOString().slice(0, 16);
-            
             document.getElementById('s_afspraak').value = isoNu;
             document.getElementById('s_start').value = isoNu;
-            
-            vulVerplegingDropdown();
+            handmatigeStartIngesteld = false;
             updateAfspraakEnID();
-            laadGegevens();
-        });
+            wisselScherm('invoer');
+        }
 
         function vulVerplegingDropdown() {
             const select = document.getElementById('select_verpleging');
@@ -330,14 +334,13 @@
             if (scherm === 'overzicht') {
                 document.getElementById('scherm-overzicht').classList.remove('hidden');
                 document.getElementById('scherm-invoer').classList.add('hidden');
-                laadGegevens(); // Herlaad direct de data bij openen overzicht
+                laadGegevens();
             } else {
                 document.getElementById('scherm-overzicht').classList.add('hidden');
                 document.getElementById('scherm-invoer').classList.remove('hidden');
             }
         }
 
-        // Gegevens ophalen uit Google Sheets om ze te tonen in het overzicht
         async function laadGegevens() {
             const container = document.getElementById('sessie-lijst');
             const status = document.getElementById('status-melding');
@@ -347,16 +350,15 @@
 
             try {
                 const response = await fetch(WEB_APP_URL);
-                const data = await response.json();
+                alleSessiesData = await response.json();
 
-                if (!data || data.length === 0) {
+                if (!alleSessiesData || alleSessiesData.length === 0) {
                     status.textContent = 'Nog geen metingen gevonden in je DataKluis.';
                     return;
                 }
 
                 status.textContent = '';
-                // Doorloop alle rijen en toon ze als kaartjes
-                data.forEach(item => {
+                alleSessiesData.forEach(item => {
                     const card = document.createElement('div');
                     card.className = 'bg-white p-4 rounded-lg shadow border border-slate-200 flex flex-col justify-between';
                     card.innerHTML = `
@@ -366,8 +368,12 @@
                             <p class="text-xs text-slate-600 mt-1">Start: ${item.start || '-'}</p>
                             <p class="text-xs text-slate-600">Stop: ${item.stop || '-'}</p>
                         </div>
-                        <div class="mt-3 pt-2 border-t border-slate-100 flex justify-between items-center text-xs text-slate-500">
-                            <span>Duur: ${item.duur || '-'}</span>
+                        <div class="mt-4 pt-2 border-t border-slate-100 flex justify-between items-center">
+                            <span class="text-xs text-slate-500">Duur: ${item.duur || '-'}</span>
+                            <div class="space-x-2">
+                                <button onclick="bewerkSessie('${item.id}')" class="bg-amber-500 text-white px-2.5 py-1 rounded text-xs hover:bg-amber-600">Bewerken</button>
+                                <button onclick="verwijderSessie('${item.id}')" class="bg-red-500 text-white px-2.5 py-1 rounded text-xs hover:bg-red-600">Verwijderen</button>
+                            </div>
                         </div>
                     `;
                     container.appendChild(card);
@@ -377,7 +383,53 @@
             }
         }
 
-        // Gegevens verzenden naar Google Sheets
+        // Sessie inladen om te bewerken (wordt opgeslagen in hetzelfde record via ID)
+        function bewerkSessie(id) {
+            const item = alleSessiesData.find(s => s.id === id);
+            if (!item) return;
+
+            document.getElementById('form-titel').textContent = 'Sessie Bewerken: ' + id;
+            document.getElementById('s_id').value = item.id || '';
+            document.getElementById('s_type').value = item.type || 'Nacht';
+            document.getElementById('s_afspraak').value = item.afspraak || '';
+            document.getElementById('s_start').value = item.start || '';
+            document.getElementById('s_stop').value = item.stop || '';
+            document.getElementById('s_duur').value = item.duur || '';
+            document.getElementById('s_aansluit').value = item.aansluit || '';
+            document.getElementById('s_droog').value = item.droog || '109';
+            document.getElementById('s_pre').value = item.pre || '';
+            document.getElementById('s_post').value = item.post || '';
+            document.getElementById('s_uf_advies').value = item.uf_advies || '';
+            document.getElementById('s_uf_ingeschat').value = item.uf_ingeschat || '';
+            document.getElementById('s_uf_werkelijk').value = item.uf_werkelijk || '';
+            document.getElementById('s_bovendruk').value = item.bovendruk || '';
+            document.getElementById('s_onderdruk').value = item.onderdruk || '';
+            document.getElementById('s_hartslag').value = item.hartslag || '';
+            document.getElementById('s_sf_resultaat').value = item.sf_resultaat || '';
+            document.getElementById('s_verslag').value = item.verslag || '';
+
+            wisselScherm('invoer');
+        }
+
+        // Verwijder record op basis van ID
+        async function verwijderSessie(id) {
+            if (!confirm('Weet je zeker dat je deze sessie wilt verwijderen?')) return;
+
+            try {
+                await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'delete', id: id })
+                });
+                alert('Sessie verwijderd!');
+                laadGegevens();
+            } catch (error) {
+                alert('Fout bij verwijderen: ' + error);
+            }
+        }
+
+        // Gegevens verzenden (Opslaan of Bewerken in hetzelfde record)
         async function verstuurData(e) {
             e.preventDefault();
 
@@ -385,8 +437,14 @@
             btnOpslaan.textContent = 'Opslaan...';
             btnOpslaan.disabled = true;
 
+            const currentId = document.getElementById('s_id').value;
+            // Check of dit ID al bestaat om te bepalen of het een update of nieuwe toevoeging is
+            const bestaatAl = alleSessiesData.some(s => s.id === currentId);
+            const actionType = bestaatAl ? 'update' : 'save';
+
             const formData = {
-                id: document.getElementById('s_id').value,
+                action: actionType,
+                id: currentId,
                 type: document.getElementById('s_type').value,
                 afspraak: document.getElementById('s_afspraak').value,
                 start: document.getElementById('s_start').value,
@@ -402,13 +460,13 @@
                 bovendruk: document.getElementById('s_bovendruk').value,
                 onderdruk: document.getElementById('s_onderdruk').value,
                 hartslag: document.getElementById('s_hartslag').value,
-                f25: Array.from(document.querySelectorAll('input[name="f25"]:checked')).map(cb => cb.value),
-                f50: Array.from(document.querySelectorAll('input[name="f50"]:checked')).map(cb => cb.value),
-                epo: document.getElementById('chk_epo').checked,
-                ijzer: document.getElementById('chk_ijzer').checked,
-                sf_meting: document.getElementById('chk_sf_meting').checked,
+                f25: Array.from(document.querySelectorAll('input[name="f25"]:checked')).map(cb => cb.value).join(', '),
+                f50: Array.from(document.querySelectorAll('input[name="f50"]:checked')).map(cb => cb.value).join(', '),
+                epo: document.getElementById('chk_epo').checked ? 'Ja' : 'Nee',
+                ijzer: document.getElementById('chk_ijzer').checked ? 'Ja' : 'Nee',
+                sf_meting: document.getElementById('chk_sf_meting').checked ? 'Ja' : 'Nee',
                 sf_resultaat: document.getElementById('s_sf_resultaat').value,
-                verpleging: Array.from(document.getElementById('select_verpleging').selectedOptions).map(opt => opt.value),
+                verpleging: Array.from(document.getElementById('select_verpleging').selectedOptions).map(opt => opt.value).join(', '),
                 verslag: document.getElementById('s_verslag').value
             };
 
@@ -421,7 +479,6 @@
                 });
                 
                 alert('Gegevens succesvol opgeslagen in je Google Sheets DataKluis!');
-                document.getElementById('datakluis-form').reset();
                 wisselScherm('overzicht');
             } catch (error) {
                 alert('Fout bij verbinden met Google Sheets: ' + error);
