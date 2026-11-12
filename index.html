@@ -37,20 +37,43 @@
             </div>
         </section>
 
-        <!-- SCHERM 2: INVOER (Gekoppeld aan alle tabbladen via Dialysesessie ID) -->
+        <!-- SCHERM 2: INVOER -->
         <section id="scherm-invoer" class="hidden max-w-3xl mx-auto bg-white p-6 md:p-8 rounded-xl shadow-md border border-slate-200">
             <h2 class="text-2xl font-semibold text-slate-800 mb-2">Nieuwe Sessie Invoeren</h2>
-            <p class="text-xs text-slate-500 mb-6">Wordt automatisch gekoppeld aan 'Afspraken&Tijden' en alle onderliggende tabbladen.</p>
+            <p class="text-xs text-slate-500 mb-6">Gekoppeld aan 'Afspraken&Tijden' en alle onderliggende tabbladen.</p>
             
             <form id="datakluis-form" onsubmit="verstuurData(event)" class="space-y-6">
                 
-                <!-- 1. Afspraken & Tijden (Het Hoofdblad) -->
-                <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
-                    <h3 class="text-sm font-bold text-blue-700 uppercase mb-3">1. Afspraken & Tijden (Hoofdblad)</h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <!-- 1. Afspraken & Tijden (Centrale Hoofdblad) -->
+                <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-4">
+                    <h3 class="text-sm font-bold text-blue-700 uppercase">1. Afspraken & Tijden</h3>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <div>
-                            <label class="block text-xs font-medium text-slate-600">Dialysesessie ID / Datum</label>
-                            <input type="date" id="s_id" required class="w-full border rounded p-2 text-sm bg-white">
+                            <label class="block text-xs font-medium text-slate-600">Type Sessie</label>
+                            <select id="s_type" class="w-full border rounded p-2 text-sm bg-white font-medium" onchange="berekenTijdenEnVloeistof()">
+                                <option value="Dag">Dag (4 uur)</option>
+                                <option value="Nacht" selected>Nacht (7 uur)</option>
+                            </select>
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-medium text-slate-600">Gegenereerd Dialyse ID</label>
+                            <input type="text" id="s_id" readonly class="w-full border rounded p-2 text-sm bg-slate-200 font-bold text-slate-700">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600">Start Datum & Tijd</label>
+                            <input type="datetime-local" id="s_start" required class="w-full border rounded p-2 text-sm bg-white" onchange="berekenTijdenEnVloeistof()">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600">Stop Datum & Tijd (Editbaar)</label>
+                            <input type="datetime-local" id="s_stop" required class="w-full border rounded p-2 text-sm bg-white" onchange="berekenDuur()">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600">Berekende Duur</label>
+                            <input type="text" id="s_duur" readonly class="w-full border rounded p-2 text-sm bg-slate-200 font-bold">
                         </div>
                     </div>
                 </div>
@@ -60,8 +83,8 @@
                     <h3 class="text-sm font-bold text-blue-700 uppercase mb-3">2. Gewicht & UF</h3>
                     <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-3">
                         <div>
-                            <label class="block text-xs font-medium text-slate-600">Aansluit vloeisto</label>
-                            <input type="text" id="s_aansluit" class="w-full border rounded p-2 text-sm bg-white">
+                            <label class="block text-xs font-medium text-slate-600">Aansluit vloeistof (optioneel)</label>
+                            <input type="number" step="0.1" id="s_aansluit" class="w-full border rounded p-2 text-sm bg-white" placeholder="0.3 of 0.6">
                         </div>
                         <div>
                             <label class="block text-xs font-medium text-slate-600">Drooggewicht (kg)</label>
@@ -174,7 +197,63 @@
 
     <!-- JavaScript Logica -->
     <script>
-        // Formule: pre weight - dry weight + 0.3
+        // Huidige datum/tijd instellen bij openen
+        window.addEventListener('DOMContentLoaded', () => {
+            const nu = new Date();
+            nu.setMinutes(nu.getMinutes() - nu.getTimezoneOffset());
+            document.getElementById('s_start').value = nu.toISOString().slice(0, 16);
+            berekenTijdenEnVloeistof();
+        });
+
+        // Automatische berekening van Stoptijd, ID, Vloeistof en Duur
+        function berekenTijdenEnVloeistof() {
+            const startVal = document.getElementById('s_start').value;
+            const typeSessie = document.getElementById('s_type').value;
+            const aansluitInput = document.getElementById('s_aansluit');
+
+            if (!startVal) return;
+
+            const startDate = new Date(startVal);
+            
+            // 1. Aansluit vloeistof standaard instellen op basis van Dag (0.6) of Nacht (0.3)
+            if (typeSessie === 'Dag') {
+                aansluitInput.value = '0.6';
+            } else {
+                aansluitInput.value = '0.3';
+            }
+
+            // 2. Stop tijd berekenen (Dag = +4 uur, Nacht = +7 uur)
+            const urenErbij = (typeSessie === 'Dag') ? 4 : 7;
+            const stopDate = new Date(startDate.getTime() + (urenErbij * 60 * 60 * 1000));
+            
+            // Format naar yyyy-MM-ddTHH:mm voor de input field
+            stopDate.setMinutes(stopDate.getMinutes() - stopDate.getTimezoneOffset());
+            document.getElementById('s_stop').value = stopDate.toISOString().slice(0, 16);
+
+            // 3. Dialyse ID opbouwen (Datum + Tijd + Type)
+            const datumStr = startVal.split('T')[0];
+            const tijdStr = startVal.split('T')[1];
+            document.getElementById('s_id').value = `${datumStr}-${tijdStr}-${typeSessie}`;
+
+            berekenDuur();
+        }
+
+        function berekenDuur() {
+            const startVal = document.getElementById('s_start').value;
+            const stopVal = document.getElementById('s_stop').value;
+            if (!startVal || !stopVal) return;
+
+            const diffMs = new Date(stopVal) - new Date(startVal);
+            if (diffMs > 0) {
+                const diffHrs = Math.floor(diffMs / (1000 * 60 * 60));
+                const diffMins = Math.round((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+                document.getElementById('s_duur').value = `${diffHrs} uur en ${diffMins} min`;
+            } else {
+                document.getElementById('s_duur').value = 'Onjuiste tijd';
+            }
+        }
+
+        // Formule UF Advies: pre weight - dry weight + 0.3
         function berekenUfAdvies() {
             const pre = parseFloat(document.getElementById('s_pre').value) || 0;
             const droog = parseFloat(document.getElementById('s_droog').value) || 109;
@@ -194,14 +273,6 @@
             }
         }
 
-        function bepaalUfKleur(waarde) {
-            const val = parseFloat(waarde);
-            if (isNaN(val)) return 'bg-slate-100 text-slate-800';
-            if (val >= 4.5) return 'bg-red-100 text-red-800 font-bold border border-red-300';
-            if (val >= 4.0) return 'bg-amber-100 text-amber-800 font-bold border border-amber-300';
-            return 'bg-emerald-100 text-emerald-800 font-bold border border-emerald-300';
-        }
-
         async function laadGegevens() {
             const container = document.getElementById('sessie-lijst');
             const status = document.getElementById('status-melding');
@@ -209,9 +280,9 @@
             status.textContent = '';
             container.innerHTML = `
                 <div class="bg-white p-4 rounded-lg shadow border border-slate-200">
-                    <span class="text-xs text-blue-600 font-bold">Sessie ID: 2026-06-06</span>
+                    <span class="text-xs text-blue-600 font-bold">Sessie ID: 2026-06-06-22:15-Nacht</span>
                     <h3 class="font-bold text-base text-slate-800 mt-1">Pre: 112.0 kg | Dry: 109 kg</h3>
-                    <p class="text-xs text-slate-600 mt-1">BP: 130/85 | HR: 68 bpm</p>
+                    <p class="text-xs text-slate-600 mt-1">Duur: 7 uur | Vloeistof: 0.3</p>
                     <div class="mt-3 flex justify-between items-center">
                         <span class="px-2 py-0.5 rounded text-xs bg-amber-100 text-amber-800 font-bold">UF Advies: 4.30 L</span>
                     </div>
@@ -221,7 +292,7 @@
 
         function verstuurData(e) {
             e.preventDefault();
-            alert('Gegevens succesvol gekoppeld aan de Google Sheet tabbladen!');
+            alert('Gegevens succesvol verzonden naar je Google Sheets DataKluis!');
             wisselScherm('overzicht');
         }
 
