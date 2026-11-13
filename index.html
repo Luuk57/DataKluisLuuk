@@ -10,8 +10,16 @@
     <!-- PDF Export bibliotheek -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     
-    <
-<link rel="manifest" href="manifest.json">
+    
+    <!-- PWA manifest -->
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#176b52">
+
+    <!-- Apple Web App instellingen voor iPhone/iPad -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="DataKluis">
+
 
     <!-- Apple Web App instellingen voor iPhone/iPad -->
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -808,5 +816,25 @@
             finally { btnOpslaan.textContent = 'Opslaan'; btnOpslaan.disabled = false; }
         }
     </script>
+    
+    </script>
+
+    <!-- PWA service worker -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('./sw.js')
+            .catch(function (error) {
+              console.error(
+                'Service worker registratie mislukt:',
+                error
+              );
+            });
+        });
+      }
+    </script>
+</body>
+</html>
+
 </body>
 </html>
