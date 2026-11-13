@@ -390,7 +390,7 @@
             }
         }
 
-        // Functie om opgeslagen data direct terug te zetten in de velden bij bewerken
+        // Vult alle opgeslagen velden feilloos in bij bewerken
         function bewerkSessie(id) {
             const item = alleSessiesData.find(s => (s.id === id || s.ID === id));
             if (!item) return;
@@ -419,7 +419,7 @@
             document.getElementById('s_onderdruk').value = item.onderdruk || item.Onderdruk || '';
             document.getElementById('s_hartslag').value = item.hartslag || item.Hartslag || '';
             
-            // 4. Toedingeningen (Checkboxes voor Fragmin 2500 & 5000)
+            // 4. Toedingeningen (Checkboxes vullen)
             const f25Waarden = String(item.f25 || item.F25 || '').split(',').map(s => s.trim());
             document.querySelectorAll('input[name="f25"]').forEach(cb => {
                 cb.checked = f25Waarden.includes(cb.value);
@@ -437,6 +437,14 @@
             
             // 5. Verpleging & Verslag
             const opgeslagenVerpleging = String(item.verpleging || item.Verpleging || '').split(',').map(s => s.trim());
+            // Voeg eventuele opgeslagen namen die nog niet in de lijst staan toe aan de dropdown
+            opgeslagenVerpleging.forEach(naam => {
+                if (naam && !verplegingLijst.includes(naam)) {
+                    verplegingLijst.push(naam);
+                }
+            });
+            vulVerplegingDropdown();
+
             const selectVerpl = document.getElementById('select_verpleging');
             Array.from(selectVerpl.options).forEach(opt => {
                 opt.selected = opgeslagenVerpleging.includes(opt.value);
