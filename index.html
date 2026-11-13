@@ -351,6 +351,14 @@
             } catch (e) { document.getElementById('status-melding').textContent = 'Fout bij laden.'; }
         }
 
+        function genereerPdf(id) {
+            const item = alleSessiesData.find(s => (s.id === id || s.ID === id));
+            if (!item) return;
+            const element = document.createElement('div');
+            element.innerHTML = `<div style="font-family: Arial; padding: 20px;"><h1>Dialyse Rapport</h1><p>ID: ${id}</p></div>`;
+            html2pdf().from(element).save(`Dialyse-${id}.pdf`);
+        }
+
         // --- VERVOER & GPS LOGICA ---
         function nieuwVervoerFormulier() {
             document.getElementById('vervoer-form').reset();
@@ -368,24 +376,19 @@
             document.getElementById('v_naar').value = bestemming;
         }
 
-        // De Oranje GPS-knop functie: haalt tijd + GPS op
         function vulTussenstopMetGps(knopElement) {
             const rij = knopElement.closest('.tussenstop-rij');
             const tijdInput = rij.querySelector('.ts-tijd');
             const adresInput = rij.querySelector('.ts-adres');
 
-            // Huidige tijd instellen
             const nu = new Date();
             tijdInput.value = `${String(nu.getHours()).padStart(2,'0')}:${String(nu.getMinutes()).padStart(2,'0')}`;
 
-            // GPS ophalen via de browser
             adresInput.value = 'GPS locatie ophalen...';
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(async (position) => {
                     const lat = position.coords.latitude;
                     const lon = position.coords.longitude;
-                    
-                    // Probeer via OpenStreetMap een leesbaar adres te krijgen, anders coördinaten
                     try {
                         const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
                         const data = await res.json();
@@ -397,13 +400,13 @@
                     } catch (err) {
                         adresInput.value = `GPS: ${lat.toFixed(4)}, ${lon.toFixed(4)}`;
                     }
-                }, (error) => {
-                    alert('Kon GPS-locatie niet ophalen. Controleer of locatietoegang aan staat.');
+                }, () => {
+                    alert('Kon GPS-locatie niet ophalen.');
                     adresInput.value = 'Locatie onbekend';
                 }, { timeout: 10000 });
             } else {
-                alert('GPS wordt niet ondersteund door deze browser.');
-                adresInput.value = 'Geen GPS ondersteuning';
+                alert('GPS niet ondersteund.');
+                adresInput.value = 'Geen GPS';
             }
         }
 
@@ -455,6 +458,7 @@
             renderRouteKnoppen();
         }
 
+        // Vervoer overzicht met alle velden en PDF-knop
         async function laadVervoerGegevens() {
             const container = document.getElementById('vervoer-lijst');
             document.getElementById('vervoer-status-melding').textContent = 'Ophalen...';
@@ -465,22 +469,89 @@
                 document.getElementById('vervoer-status-melding').textContent = '';
                 alleVervoerData.forEach(item => {
                     const card = document.createElement('div');
-                    card.className = 'bg-white p-4 rounded-lg shadow border flex flex-col justify-between';
+                    card.className = 'bg-white p-4 rounded-lg shadow border border-slate-200 flex flex-col justify-between';
                     const id = item.id || item.ID;
                     card.innerHTML = `
                         <div>
                             <span class="text-xs text-blue-600 font-bold">ID: ${id}</span>
-                            <h3 class="font-bold text-slate-800 mt-1">Firma: ${item.firma || item.Firma}</h3>
-                            <p class="text-xs text-slate-600 mt-1">Naar: ${item.naar || item.Naar || '-'}</p>
-                            <p class="text-xs text-slate-600">Start: ${item.start || item.Start || '-'}</p>
+                            <h3 class="font-bold text-slate-800 mt-1">Firma: ${item.firma || item.Firma || '-'}</h3>
+                            <p class="text-xs text-slate-700 mt-1"><strong>Naar:</strong> ${item.naar || item.Naar || '-'}</p>
+                            <p class="text-xs text-slate-600"><strong>Afspraak:</strong> ${item.afspraak || item.Afspraak || '-'}</p>
+                            <p class="text-xs text-slate-600"><strong>Start:</strong> ${item.start || item.Start || '-'}</p>
+                            <p class="text-xs text-slate-600"><strong>Stop:</strong> ${item.stop || item.Stop || '-'}</p>
+                            <p class="text-xs text-slate-600 mt-1"><strong>Tussenstops:</strong> ${item.tussenstops || item.Tussenstops || 'Geen'}</p>
+                            <p class="text-xs text-slate-600 mt-1"><strong>Opmerking:</strong> ${item.opmerking || item.Opmerking || '-'}</p>
                         </div>
                         <div class="mt-4 pt-2 border-t flex justify-end gap-1.5">
-                            <button onclick="bewerkVervoer('${id}')" class="bg-amber-500 text-white px-2.5 py-1 rounded text-xs">Bewerken</button>
-                            <button onclick="verwijderVervoer('${id}')" class="bg-red-500 text-white px-2.5 py-1 rounded text-xs">Verwijderen</button>
+                            <button onclick="genereerVervoerPdf('${id}')" class="bg-emerald-600 text-white px-2.5 py-1 rounded text-xs hover:bg-emerald-700">PDF</button>
+                            <button onclick="bewerkVervoer('${id}')" class="bg-amber-500 text-white px-2.5 py-1 rounded text-xs hover:bg-amber-600">Bewerken</button>
+                            <button onclick="verwijderVervoer('${id}')" class="bg-red-500 text-white px-2.5 py-1 rounded text-xs hover:bg-red-600">Verwijderen</button>
                         </div>`;
                     container.appendChild(card);
                 });
             } catch (e) { document.getElementById('vervoer-status-melding').textContent = 'Fout bij laden.'; }
+        }
+
+        function genereerVervoerPdf(id) {
+            const item = alleVervoerData.find(s => (s.id === id || s.ID === id));
+            if (!item) return;
+
+            let tsHtml = '';
+            const tsString = item.tussenstops || item.Tussenstops || '';
+            if (tsString) {
+                tsHtml = tsString.split(' | ').map(t => `<div style="padding: 2px 0;">• ${t}</div>`).join('');
+            } else {
+                tsHtml = 'Geen tussenstops.';
+            }
+
+            const element = document.createElement('div');
+            element.innerHTML = `
+                <div style="font-family: Arial, sans-serif; padding: 25px; color: #1e293b; background: #ffffff; width: 700px;">
+                    <div style="border-bottom: 3px solid #1d4ed8; padding-bottom: 12px; margin-bottom: 20px; display: flex; justify-content: space-between;">
+                        <div>
+                            <h1 style="color: #1d4ed8; margin: 0; font-size: 22px;">DataKluis • Vervoersrapport</h1>
+                            <p style="margin: 4px 0 0 0; font-size: 13px; color: #64748b;">Rit Overzicht - Luuk</p>
+                        </div>
+                        <div style="text-align: right; font-size: 11px; color: #64748b;">
+                            Datum: ${new Date().toLocaleDateString('nl-NL')}
+                        </div>
+                    </div>
+
+                    <div style="background: #f8fafc; border: 1px solid #cbd5e1; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                        <table style="width: 100%; font-size: 13px; border-collapse: collapse;">
+                            <tr><td style="padding: 4px 0; font-weight: bold; width: 35%;">Rit ID:</td><td>${item.id || item.ID || '-'}</td></tr>
+                            <tr><td style="padding: 4px 0; font-weight: bold;">Vervoersfirma:</td><td>${item.firma || item.Firma || '-'}</td></tr>
+                            <tr><td style="padding: 4px 0; font-weight: bold;">Bestemming (Naar):</td><td>${item.naar || item.Naar || '-'}</td></tr>
+                            <tr><td style="padding: 4px 0; font-weight: bold;">Afspraak Tijd:</td><td>${item.afspraak || item.Afspraak || '-'}</td></tr>
+                            <tr><td style="padding: 4px 0; font-weight: bold;">Vertrektijd (Start):</td><td>${item.start || item.Start || '-'}</td></tr>
+                            <tr><td style="padding: 4px 0; font-weight: bold;">Aankomsttijd (Stop):</td><td>${item.stop || item.Stop || '-'}</td></tr>
+                        </table>
+                    </div>
+
+                    <div style="background: #f8fafc; border: 1px solid #cbd5e1; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                        <h3 style="margin: 0 0 8px 0; color: #1d4ed8; font-size: 14px; text-transform: uppercase;">Tussenstops & GPS</h3>
+                        <div style="font-size: 13px;">${tsHtml}</div>
+                    </div>
+
+                    <div style="background: #f8fafc; border: 1px solid #cbd5e1; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
+                        <h3 style="margin: 0 0 8px 0; color: #1d4ed8; font-size: 14px; text-transform: uppercase;">Opmerkingen</h3>
+                        <p style="margin: 0; font-size: 13px;">${item.opmerking || item.Opmerking || 'Geen opmerkingen.'}</p>
+                    </div>
+
+                    <div style="text-align: center; font-size: 10px; color: #94a3b8; border-top: 1px solid #cbd5e1; padding-top: 8px;">
+                        DataKluis Vervoersysteem • Vertrouwelijk Overzicht
+                    </div>
+                </div>`;
+
+            const opt = {
+                margin: 5,
+                filename: `Vervoersrapport-${id}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            html2pdf().from(element).set(opt).save();
         }
 
         async function verstuurVervoerData(e) {
