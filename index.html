@@ -390,34 +390,36 @@
             }
         }
 
-        // Exacte datum/tijd weergave zonder tijdzone verschuiving
+        // Tijdzone-immuune datum parser (haalt exact de getallen uit de tekst)
         function formatteerDatumVoorInput(datumString) {
             if (!datumString) return '';
             
-            if (typeof datumString === 'string') {
-                if (datumString.includes(',')) {
-                    const delen = datumString.split(',');
-                    const datumDelen = delen[0].trim().split('-');
-                    const tijdDelen = delen[1].trim().split(':');
-                    if (datumDelen.length === 3 && tijdDelen.length >= 2) {
-                        return `${datumDelen[2]}-${datumDelen[1]}-${datumDelen[0]}T${tijdDelen[0]}:${tijdDelen[1]}`;
-                    }
-                }
-                if (datumString.includes('T')) {
-                    return datumString.slice(0, 16);
-                }
+            let str = String(datumString).trim();
+            
+            if (str.includes('T')) {
+                return str.slice(0, 16);
             }
             
-            const d = new Date(datumString);
-            if (isNaN(d.getTime())) return '';
-
-            const jaar = d.getFullYear();
-            const maand = String(d.getMonth() + 1).padStart(2, '0');
-            const dag = String(d.getDate()).padStart(2, '0');
-            const uren = String(d.getHours()).padStart(2, '0');
-            const minuten = String(d.getMinutes()).padStart(2, '0');
-
-            return `${jaar}-${maand}-${dag}T${uren}:${minuten}`;
+            const matches = str.match(/(\d{1,4})/g);
+            if (matches && matches.length >= 5) {
+                let jaar, maand, dag, uur, minuut;
+                if (matches[0].length === 4) {
+                    jaar = matches[0];
+                    maand = matches[1].padStart(2, '0');
+                    dag = matches[2].padStart(2, '0');
+                    uur = matches[3].padStart(2, '0');
+                    minuut = matches[4].padStart(2, '0');
+                } else {
+                    dag = matches[0].padStart(2, '0');
+                    maand = matches[1].padStart(2, '0');
+                    jaar = matches[2];
+                    uur = matches[3].padStart(2, '0');
+                    minuut = matches[4].padStart(2, '0');
+                }
+                return `${jaar}-${maand}-${dag}T${uur}:${minuut}`;
+            }
+            
+            return '';
         }
 
         function bewerkSessie(id) {
