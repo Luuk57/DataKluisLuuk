@@ -390,19 +390,32 @@
             }
         }
 
-        // Vult alle opgeslagen velden feilloos in bij bewerken
+        // Hulpfunctie om datums om te zetten naar het formaat dat datetime-local nodig heeft (YYYY-MM-DDTHH:mm)
+        function formatteerDatumVoorInput(datumString) {
+            if (!datumString) return '';
+            // Als het al in YYYY-MM-DDTHH:mm staat
+            if (datumString.includes('T')) return datumString.slice(0, 16);
+            
+            // Anders proberen om te zetten via Date object
+            const d = new Date(datumString);
+            if (isNaN(d.getTime())) return '';
+            d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+            return d.toISOString().slice(0, 16);
+        }
+
+        // Vult alle opgeslagen velden feilloos in bij bewerken (inclusief datums)
         function bewerkSessie(id) {
             const item = alleSessiesData.find(s => (s.id === id || s.ID === id));
             if (!item) return;
 
             document.getElementById('form-titel').textContent = 'Sessie Bewerken: ' + id;
             
-            // 1. Afspraken & Tijden
+            // 1. Afspraken & Tijden (met juiste datum-conversie)
             document.getElementById('s_id').value = item.id || item.ID || '';
             document.getElementById('s_type').value = item.type || item.Type || 'Nacht';
-            document.getElementById('s_afspraak').value = item.afspraak || item.Afspraak || '';
-            document.getElementById('s_start').value = item.start || item.Start || '';
-            document.getElementById('s_stop').value = item.stop || item.Stop || '';
+            document.getElementById('s_afspraak').value = formatteerDatumVoorInput(item.afspraak || item.Afspraak);
+            document.getElementById('s_start').value = formatteerDatumVoorInput(item.start || item.Start);
+            document.getElementById('s_stop').value = formatteerDatumVoorInput(item.stop || item.Stop);
             document.getElementById('s_duur').value = item.duur || item.Duur || '';
             
             // 2. Gewicht & UF
@@ -437,7 +450,6 @@
             
             // 5. Verpleging & Verslag
             const opgeslagenVerpleging = String(item.verpleging || item.Verpleging || '').split(',').map(s => s.trim());
-            // Voeg eventuele opgeslagen namen die nog niet in de lijst staan toe aan de dropdown
             opgeslagenVerpleging.forEach(naam => {
                 if (naam && !verplegingLijst.includes(naam)) {
                     verplegingLijst.push(naam);
