@@ -390,16 +390,24 @@
             }
         }
 
-        // Verbeterde datum-omzetting die de tijd exact behoudt zonder UTC-verschuiving
+        // Exacte datum/tijd weergave zonder tijdzone verschuiving
         function formatteerDatumVoorInput(datumString) {
             if (!datumString) return '';
             
-            // Als het een ISO string is of al YYYY-MM-DDTHH:mm bevat
-            if (typeof datumString === 'string' && datumString.includes('T')) {
-                return datumString.slice(0, 16);
+            if (typeof datumString === 'string') {
+                if (datumString.includes(',')) {
+                    const delen = datumString.split(',');
+                    const datumDelen = delen[0].trim().split('-');
+                    const tijdDelen = delen[1].trim().split(':');
+                    if (datumDelen.length === 3 && tijdDelen.length >= 2) {
+                        return `${datumDelen[2]}-${datumDelen[1]}-${datumDelen[0]}T${tijdDelen[0]}:${tijdDelen[1]}`;
+                    }
+                }
+                if (datumString.includes('T')) {
+                    return datumString.slice(0, 16);
+                }
             }
             
-            // Als Google Sheets een datumobject of tekstformaat teruggeeft, parsen we de losse onderdelen
             const d = new Date(datumString);
             if (isNaN(d.getTime())) return '';
 
