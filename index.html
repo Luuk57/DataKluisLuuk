@@ -390,27 +390,35 @@
             }
         }
 
-        // Hulpfunctie om datums om te zetten naar het formaat dat datetime-local nodig heeft (YYYY-MM-DDTHH:mm)
+        // Verbeterde datum-omzetting die de tijd exact behoudt zonder UTC-verschuiving
         function formatteerDatumVoorInput(datumString) {
             if (!datumString) return '';
-            // Als het al in YYYY-MM-DDTHH:mm staat
-            if (datumString.includes('T')) return datumString.slice(0, 16);
             
-            // Anders proberen om te zetten via Date object
+            // Als het een ISO string is of al YYYY-MM-DDTHH:mm bevat
+            if (typeof datumString === 'string' && datumString.includes('T')) {
+                return datumString.slice(0, 16);
+            }
+            
+            // Als Google Sheets een datumobject of tekstformaat teruggeeft, parsen we de losse onderdelen
             const d = new Date(datumString);
             if (isNaN(d.getTime())) return '';
-            d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
-            return d.toISOString().slice(0, 16);
+
+            const jaar = d.getFullYear();
+            const maand = String(d.getMonth() + 1).padStart(2, '0');
+            const dag = String(d.getDate()).padStart(2, '0');
+            const uren = String(d.getHours()).padStart(2, '0');
+            const minuten = String(d.getMinutes()).padStart(2, '0');
+
+            return `${jaar}-${maand}-${dag}T${uren}:${minuten}`;
         }
 
-        // Vult alle opgeslagen velden feilloos in bij bewerken (inclusief datums)
         function bewerkSessie(id) {
             const item = alleSessiesData.find(s => (s.id === id || s.ID === id));
             if (!item) return;
 
             document.getElementById('form-titel').textContent = 'Sessie Bewerken: ' + id;
             
-            // 1. Afspraken & Tijden (met juiste datum-conversie)
+            // 1. Afspraken & Tijden
             document.getElementById('s_id').value = item.id || item.ID || '';
             document.getElementById('s_type').value = item.type || item.Type || 'Nacht';
             document.getElementById('s_afspraak').value = formatteerDatumVoorInput(item.afspraak || item.Afspraak);
