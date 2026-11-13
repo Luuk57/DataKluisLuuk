@@ -209,9 +209,6 @@
 
     </main>
 
-    <!-- Verborgen container om professionele PDF rapporten te genereren -->
-    <div id="pdf-template" class="hidden"></div>
-
     <footer class="bg-white border-t py-3 text-center text-xs text-slate-500">
         DataKluis • Werkt naadloos op PC, Laptop, Tablet en Telefoon
     </footer>
@@ -384,8 +381,8 @@
                             <span class="text-xs text-slate-500">Duur: ${sessionDuur}</span>
                             <div class="flex gap-1.5">
                                 <button onclick="genereerPdf('${sessionId}')" class="bg-emerald-600 text-white px-2 py-1 rounded text-xs hover:bg-emerald-700">PDF</button>
-                                <button onclick="bewerkSessie('${sessionId}')" class="bg-amber-500 text-white px-2 py-1 rounded text-xs hover:bg-amber-600">Bewerken</button>
-                                <button onclick="verwijderSessie('${sessionId}')" class="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600">Verwijderen</button>
+                                <button onclick="bewerkSessie('${sessionId}')" class="bg-amber-500 text-white px-2.5 py-1 rounded text-xs hover:bg-amber-600">Bewerken</button>
+                                <button onclick="verwijderSessie('${sessionId}')" class="bg-red-500 text-white px-2.5 py-1 rounded text-xs hover:bg-red-600">Verwijderen</button>
                             </div>
                         </div>
                     `;
@@ -396,7 +393,7 @@
             }
         }
 
-        // Professionele PDF generator per sessie
+        // Directe PDF generatie zonder verborgen elementen
         function genereerPdf(id) {
             const item = alleSessiesData.find(s => (s.id === id || s.ID === id));
             if (!item) {
@@ -404,100 +401,75 @@
                 return;
             }
 
-            const template = document.getElementById('pdf-template');
-            template.innerHTML = `
-                <div style="font-family: Arial, sans-serif; padding: 30px; color: #1e293b; max-width: 800px; margin: auto; background: white;">
-                    <div style="border-bottom: 3px solid #1d4ed8; padding-bottom: 15px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center;">
+            const element = document.createElement('div');
+            element.innerHTML = `
+                <div style="font-family: Arial, sans-serif; padding: 25px; color: #1e293b; background: #ffffff; width: 700px;">
+                    <div style="border-bottom: 3px solid #1d4ed8; padding-bottom: 12px; margin-bottom: 20px; display: flex; justify-content: space-between;">
                         <div>
-                            <h1 style="color: #1d4ed8; margin: 0; font-size: 24px;">DataKluis • Dialyse Rapport</h1>
-                            <p style="margin: 5px 0 0 0; font-size: 14px; color: #64748b;">Persoonlijk Medisch Overzicht - Luuk</p>
+                            <h1 style="color: #1d4ed8; margin: 0; font-size: 22px;">DataKluis • Dialyse Rapport</h1>
+                            <p style="margin: 4px 0 0 0; font-size: 13px; color: #64748b;">Persoonlijk Medisch Overzicht - Luuk</p>
                         </div>
-                        <div style="text-align: right; font-size: 12px; color: #64748b;">
-                            Gegenereerd op: ${new Date().toLocaleDateString('nl-NL')}
+                        <div style="text-align: right; font-size: 11px; color: #64748b;">
+                            Datum: ${new Date().toLocaleDateString('nl-NL')}
                         </div>
                     </div>
 
-                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-                        <h3 style="margin: 0 0 10px 0; color: #1d4ed8; font-size: 16px;">Sessie Informatie</h3>
-                        <table style="width: 100%; font-size: 14px; border-collapse: collapse;">
-                            <tr>
-                                <td style="padding: 4px 0; font-weight: bold; width: 35%;">Dialyse ID:</td>
-                                <td style="padding: 4px 0;">${item.id || item.ID || '-'}</td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 4px 0; font-weight: bold;">Type Behandeling:</td>
-                                <td style="padding: 4px 0;">${item.type || item.Type || '-'}</td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 4px 0; font-weight: bold;">Start Tijd:</td>
-                                <td style="padding: 4px 0;">${item.start || item.Start || '-'}</td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 4px 0; font-weight: bold;">Stop Tijd:</td>
-                                <td style="padding: 4px 0;">${item.stop || item.Stop || '-'}</td>
-                            </tr>
-                            <tr>
-                                <td style="padding: 4px 0; font-weight: bold;">Totale Duur:</td>
-                                <td style="padding: 4px 0;">${item.duur || item.Duur || '-'}</td>
-                            </tr>
+                    <div style="background: #f8fafc; border: 1px solid #cbd5e1; padding: 12px; border-radius: 6px; margin-bottom: 15px;">
+                        <h3 style="margin: 0 0 8px 0; color: #1d4ed8; font-size: 14px; text-transform: uppercase;">1. Afspraken & Tijden</h3>
+                        <table style="width: 100%; font-size: 13px; border-collapse: collapse;">
+                            <tr><td style="padding: 3px 0; font-weight: bold; width: 35%;">Dialyse ID:</td><td>${item.id || item.ID || '-'}</td></tr>
+                            <tr><td style="padding: 3px 0; font-weight: bold;">Type Behandeling:</td><td>${item.type || item.Type || '-'}</td></tr>
+                            <tr><td style="padding: 3px 0; font-weight: bold;">Start Tijd:</td><td>${item.start || item.Start || '-'}</td></tr>
+                            <tr><td style="padding: 3px 0; font-weight: bold;">Stop Tijd:</td><td>${item.stop || item.Stop || '-'}</td></tr>
+                            <tr><td style="padding: 3px 0; font-weight: bold;">Totale Duur:</td><td>${item.duur || item.Duur || '-'}</td></tr>
                         </table>
                     </div>
 
-                    <div style="display: flex; gap: 20px; margin-bottom: 20px;">
-                        <div style="flex: 1; background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px;">
-                            <h3 style="margin: 0 0 10px 0; color: #1d4ed8; font-size: 16px;">Gewicht & UF</h3>
-                            <table style="width: 100%; font-size: 13px; border-collapse: collapse;">
-                                <tr><td style="padding: 3px 0; font-weight: bold;">Aansluitvloeistof:</td><td>${item.aansluit || item.Aansluit || '-'} L</td></tr>
-                                <tr><td style="padding: 3px 0; font-weight: bold;">Drooggewicht:</td><td>${item.droog || item.Droog || '-'} kg</td></tr>
-                                <tr><td style="padding: 3px 0; font-weight: bold;">Pre-gewicht:</td><td>${item.pre || item.Pre || '-'} kg</td></tr>
-                                <tr><td style="padding: 3px 0; font-weight: bold;">Post-gewicht:</td><td>${item.post || item.Post || '-'} kg</td></tr>
-                                <tr><td style="padding: 3px 0; font-weight: bold;">UF Advies:</td><td>${item.uf_advies || item.Uf_advies || '-'}</td></tr>
-                                <tr><td style="padding: 3px 0; font-weight: bold;">UF Ingeschat:</td><td>${item.uf_ingeschat || item.Uf_ingeschat || '-'} L</td></tr>
-                                <tr><td style="padding: 3px 0; font-weight: bold;">UF Werkelijk:</td><td>${item.uf_werkelijk || item.Uf_werkelijk || '-'} L</td></tr>
-                            </table>
-                        </div>
-
-                        <div style="flex: 1; background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px;">
-                            <h3 style="margin: 0 0 10px 0; color: #1d4ed8; font-size: 16px;">Bloeddruk & Hartslag</h3>
-                            <table style="width: 100%; font-size: 13px; border-collapse: collapse;">
-                                <tr><td style="padding: 3px 0; font-weight: bold;">Bovendruk:</td><td>${item.bovendruk || item.Bovendruk || '-'} mmHg</td></tr>
-                                <tr><td style="padding: 3px 0; font-weight: bold;">Onderdruk:</td><td>${item.onderdruk || item.Onderdruk || '-'} mmHg</td></tr>
-                                <tr><td style="padding: 3px 0; font-weight: bold;">Hartslag:</td><td>${item.hartslag || item.Hartslag || '-'} bpm</td></tr>
-                            </table>
-                            
-                            <h3 style="margin: 15px 0 10px 0; color: #1d4ed8; font-size: 16px;">Toedingeningen</h3>
-                            <table style="width: 100%; font-size: 13px; border-collapse: collapse;">
-                                <tr><td style="padding: 3px 0; font-weight: bold;">Fragmin 2500:</td><td>${item.f25 || item.F25 || 'Geen'}</td></tr>
-                                <tr><td style="padding: 3px 0; font-weight: bold;">Fragmin 5000:</td><td>${item.f50 || item.F50 || 'Geen'}</td></tr>
-                                <tr><td style="padding: 3px 0; font-weight: bold;">Epo / IJzer:</td><td>${item.epo || item.Epo || 'Nee'} / ${item.ijzer || item.Ijzer || 'Nee'}</td></tr>
-                                <tr><td style="padding: 3px 0; font-weight: bold;">Shuntflow meting:</td><td>${item.sf_meting || item.Sf_meting || 'Nee'} (${item.sf_resultaat || item.Sf_resultaat || '-'} ml/min)</td></tr>
-                            </table>
-                        </div>
+                    <div style="background: #f8fafc; border: 1px solid #cbd5e1; padding: 12px; border-radius: 6px; margin-bottom: 15px;">
+                        <h3 style="margin: 0 0 8px 0; color: #1d4ed8; font-size: 14px; text-transform: uppercase;">2. Gewicht & UF</h3>
+                        <table style="width: 100%; font-size: 13px; border-collapse: collapse;">
+                            <tr><td style="padding: 3px 0; font-weight: bold; width: 35%;">Aansluitvloeistof:</td><td>${item.aansluit || item.Aansluit || '-'} L</td></tr>
+                            <tr><td style="padding: 3px 0; font-weight: bold;">Drooggewicht:</td><td>${item.droog || item.Droog || '-'} kg</td></tr>
+                            <tr><td style="padding: 3px 0; font-weight: bold;">Pre-gewicht:</td><td>${item.pre || item.Pre || '-'} kg</td></tr>
+                            <tr><td style="padding: 3px 0; font-weight: bold;">Post-gewicht:</td><td>${item.post || item.Post || '-'} kg</td></tr>
+                            <tr><td style="padding: 3px 0; font-weight: bold;">UF Advies:</td><td>${item.uf_advies || item.Uf_advies || '-'}</td></tr>
+                            <tr><td style="padding: 3px 0; font-weight: bold;">UF Ingeschat:</td><td>${item.uf_ingeschat || item.Uf_ingeschat || '-'} L</td></tr>
+                            <tr><td style="padding: 3px 0; font-weight: bold;">UF Werkelijk:</td><td>${item.uf_werkelijk || item.Uf_werkelijk || '-'} L</td></tr>
+                        </table>
                     </div>
 
-                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
-                        <h3 style="margin: 0 0 10px 0; color: #1d4ed8; font-size: 16px;">Verpleging & Verslag</h3>
-                        <p style="margin: 0 0 8px 0; font-size: 13px;"><strong>Verpleging:</strong> ${item.verpleging || item.Verpleging || 'Niet opgegeven'}</p>
-                        <p style="margin: 0; font-size: 13px;"><strong>Bijzonderheden / Verslag:</strong><br>${item.verslag || item.Verslag || 'Geen bijzonderheden genoteerd.'}</p>
+                    <div style="background: #f8fafc; border: 1px solid #cbd5e1; padding: 12px; border-radius: 6px; margin-bottom: 15px;">
+                        <h3 style="margin: 0 0 8px 0; color: #1d4ed8; font-size: 14px; text-transform: uppercase;">3. Bloeddruk, HR & Toedingeningen</h3>
+                        <table style="width: 100%; font-size: 13px; border-collapse: collapse;">
+                            <tr><td style="padding: 3px 0; font-weight: bold; width: 35%;">Bloeddruk / Hartslag:</td><td>${item.bovendruk || item.Bovendruk || '-'}/${item.onderdruk || item.Onderdruk || '-'} mmHg (${item.hartslag || item.Hartslag || '-'} bpm)</td></tr>
+                            <tr><td style="padding: 3px 0; font-weight: bold;">Fragmin 2500:</td><td>${item.f25 || item.F25 || 'Geen'}</td></tr>
+                            <tr><td style="padding: 3px 0; font-weight: bold;">Fragmin 5000:</td><td>${item.f50 || item.F50 || 'Geen'}</td></tr>
+                            <tr><td style="padding: 3px 0; font-weight: bold;">Epo / IJzer:</td><td>${item.epo || item.Epo || 'Nee'} / ${item.ijzer || item.Ijzer || 'Nee'}</td></tr>
+                            <tr><td style="padding: 3px 0; font-weight: bold;">Shuntflow meting:</td><td>${item.sf_meting || item.Sf_meting || 'Nee'} (${item.sf_resultaat || item.Sf_resultaat || '-'} ml/min)</td></tr>
+                        </table>
                     </div>
 
-                    <div style="text-align: center; font-size: 11px; color: #94a3b8; border-top: 1px solid #e2e8f0; pt-10px;">
+                    <div style="background: #f8fafc; border: 1px solid #cbd5e1; padding: 12px; border-radius: 6px; margin-bottom: 15px;">
+                        <h3 style="margin: 0 0 8px 0; color: #1d4ed8; font-size: 14px; text-transform: uppercase;">4. Verpleging & Verslag</h3>
+                        <p style="margin: 0 0 6px 0; font-size: 13px;"><strong>Verpleging:</strong> ${item.verpleging || item.Verpleging || 'Niet opgegeven'}</p>
+                        <p style="margin: 0; font-size: 13px;"><strong>Bijzonderheden:</strong><br>${item.verslag || item.Verslag || 'Geen bijzonderheden.'}</p>
+                    </div>
+
+                    <div style="text-align: center; font-size: 10px; color: #94a3b8; border-top: 1px solid #cbd5e1; padding-top: 8px;">
                         DataKluis Dialyse Systeem • Vertrouwelijk Medisch Overzicht
                     </div>
                 </div>
             `;
 
             const opt = {
-                margin:       10,
+                margin:       5,
                 filename:     `Dialyse-Rapport-${id}.pdf`,
                 image:        { type: 'jpeg', quality: 0.98 },
                 html2canvas:  { scale: 2, useCORS: true },
                 jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
 
-            html2pdf().from(template).set(opt).save().then(() => {
-                template.innerHTML = ''; // Schoonmaak na download
-            });
+            html2pdf().from(element).set(opt).save();
         }
 
         // Tijdzone-immuune datum parser
@@ -505,7 +477,7 @@
             if (!datumString) return '';
             
             let str = String(datumString).trim();
-            if (str.startsWith("'")) str = str.substring(1); // Verwijder eventueel beveiligings-aanhalingsteken
+            if (str.startsWith("'")) str = str.substring(1);
             
             if (str.includes('T')) {
                 return str.slice(0, 16);
@@ -539,7 +511,6 @@
 
             document.getElementById('form-titel').textContent = 'Sessie Bewerken: ' + id;
             
-            // 1. Afspraken & Tijden
             document.getElementById('s_id').value = item.id || item.ID || '';
             document.getElementById('s_type').value = item.type || item.Type || 'Nacht';
             document.getElementById('s_afspraak').value = formatteerDatumVoorInput(item.afspraak || item.Afspraak);
@@ -547,7 +518,6 @@
             document.getElementById('s_stop').value = formatteerDatumVoorInput(item.stop || item.Stop);
             document.getElementById('s_duur').value = item.duur || item.Duur || '';
             
-            // 2. Gewicht & UF
             document.getElementById('s_aansluit').value = item.aansluit || item.Aansluit || '';
             document.getElementById('s_droog').value = item.droog || item.Droog || '109';
             document.getElementById('s_pre').value = item.pre || item.Pre || '';
@@ -556,12 +526,10 @@
             document.getElementById('s_uf_ingeschat').value = item.uf_ingeschat || item.Uf_ingeschat || '';
             document.getElementById('s_uf_werkelijk').value = item.uf_werkelijk || item.Uf_werkelijk || '';
             
-            // 3. Bloeddruk & HR
             document.getElementById('s_bovendruk').value = item.bovendruk || item.Bovendruk || '';
             document.getElementById('s_onderdruk').value = item.onderdruk || item.Onderdruk || '';
             document.getElementById('s_hartslag').value = item.hartslag || item.Hartslag || '';
             
-            // 4. Toedingeningen (Checkboxes vullen)
             const f25Waarden = String(item.f25 || item.F25 || '').split(',').map(s => s.trim());
             document.querySelectorAll('input[name="f25"]').forEach(cb => {
                 cb.checked = f25Waarden.includes(cb.value);
@@ -577,7 +545,6 @@
             document.getElementById('chk_sf_meting').checked = String(item.sf_meting || item.Sf_meting || '').toLowerCase() === 'ja';
             document.getElementById('s_sf_resultaat').value = item.sf_resultaat || item.Sf_resultaat || '';
             
-            // 5. Verpleging & Verslag
             const opgeslagenVerpleging = String(item.verpleging || item.Verpleging || '').split(',').map(s => s.trim());
             opgeslagenVerpleging.forEach(naam => {
                 if (naam && !verplegingLijst.includes(naam)) {
