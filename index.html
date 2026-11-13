@@ -72,7 +72,7 @@
                         </div>
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-slate-200">
-                        <div><label class="block text-xs font-medium text-slate-600">Start</label><input type="datetime-local" id="s_start" class="w-full border rounded p-2 text-sm bg-white" onchange="markeerHandmatigeStart();"></div>
+                        <div><label class="block text-xs font-medium text-slate-600">Start</label><input type="datetime-local" id="s_start" class="w-full border rounded p-2 text-sm bg-white" onchange="markeerHandmatigeStart(); berekenDuur();"></div>
                         <div><label class="block text-xs font-medium text-slate-600">Stop</label><input type="datetime-local" id="s_stop" class="w-full border rounded p-2 text-sm bg-white" onchange="berekenDuur()"></div>
                         <div><label class="block text-xs font-medium text-slate-600">Duur</label><input type="text" id="s_duur" readonly class="w-full border rounded p-2 text-sm bg-slate-200 font-bold"></div>
                     </div>
@@ -101,8 +101,30 @@
                     <div id="bloeddruk-lijst" class="space-y-2"></div>
                 </div>
 
+                <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-4">
+                    <h3 class="text-sm font-bold text-blue-700 uppercase">4. Toedingeningen</h3>
+                    <div class="flex gap-4">
+                        <label class="text-xs flex items-center gap-1"><input type="checkbox" name="f25" value="1"> F25-1</label>
+                        <label class="text-xs flex items-center gap-1"><input type="checkbox" name="f25" value="2"> F25-2</label>
+                        <label class="text-xs flex items-center gap-1"><input type="checkbox" name="f25" value="3"> F25-3</label>
+                        <label class="text-xs flex items-center gap-1"><input type="checkbox" name="f25" value="4"> F25-4</label>
+                    </div>
+                    <div class="flex gap-4">
+                        <label class="text-xs flex items-center gap-1"><input type="checkbox" name="f50" value="1"> F50-1</label>
+                        <label class="text-xs flex items-center gap-1"><input type="checkbox" name="f50" value="2"> F50-2</label>
+                        <label class="text-xs flex items-center gap-1"><input type="checkbox" name="f50" value="3"> F50-3</label>
+                        <label class="text-xs flex items-center gap-1"><input type="checkbox" name="f50" value="4"> F50-4</label>
+                    </div>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 border-t">
+                        <label class="text-xs"><input type="checkbox" id="chk_epo"> Epo</label>
+                        <label class="text-xs"><input type="checkbox" id="chk_ijzer"> IJzer</label>
+                        <label class="text-xs"><input type="checkbox" id="chk_sf_meting"> Shuntflow</label>
+                        <input type="number" id="s_sf_resultaat" placeholder="ml/min" class="border rounded p-1 text-xs">
+                    </div>
+                </div>
+
                 <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-3">
-                    <h3 class="text-sm font-bold text-blue-700 uppercase">4. Verpleging & Verslag</h3>
+                    <h3 class="text-sm font-bold text-blue-700 uppercase">5. Verpleging & Verslag</h3>
                     <select id="select_verpleging" multiple class="w-full border rounded p-2 text-sm bg-white h-24"></select>
                     <textarea id="s_verslag" rows="3" class="w-full border rounded p-2 text-sm bg-white" placeholder="Verslag..."></textarea>
                 </div>
@@ -121,7 +143,6 @@
             <form id="vervoer-form" onsubmit="verstuurVervoerData(event)" class="space-y-6">
                 <input type="hidden" id="v_id">
 
-                <!-- Vervoersfirma -->
                 <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-3">
                     <h3 class="text-sm font-bold text-blue-700 uppercase">Vervoersfirma</h3>
                     <div class="flex gap-2 items-center">
@@ -132,10 +153,9 @@
                     </div>
                 </div>
 
-                <!-- Bestemming / Naar Veld + Snelkeuze Routes -->
                 <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-3">
                     <h3 class="text-sm font-bold text-blue-700 uppercase">Bestemming (Naar)</h3>
-                    <input type="text" id="v_naar" placeholder="Bijv. Dialyse Centrum Groningen..." class="w-full border rounded p-2 text-sm bg-white font-bold">
+                    <input type="text" id="v_naar" placeholder="Bijv. Dialyse Centrum..." class="w-full border rounded p-2 text-sm bg-white font-bold">
                     <div class="flex gap-2 items-center pt-2">
                         <span class="text-xs font-bold text-blue-700">Snelkeuze Naar:</span>
                         <div id="route-knoppen-container" class="flex flex-wrap gap-2"></div>
@@ -146,7 +166,6 @@
                     </div>
                 </div>
 
-                <!-- Rittijden met Start & Stop Knoppen -->
                 <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-4">
                     <h3 class="text-sm font-bold text-blue-700 uppercase">Rittijden</h3>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -173,17 +192,14 @@
                     </div>
                 </div>
 
-                <!-- Tussenstops met GPS-knop -->
                 <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-3">
                     <div class="flex justify-between items-center">
                         <h3 class="text-sm font-bold text-blue-700 uppercase">Tussenstops (met GPS)</h3>
                         <button type="button" onclick="voegTussenstopRijToe()" class="bg-amber-600 text-white px-3 py-1.5 rounded text-xs font-bold shadow">＋ Tussenstop Toevoegen</button>
                     </div>
-                    <p class="text-xs text-slate-500">Klik op de **oranje GPS-knop** om automatisch de huidige tijd én je huidige GPS-locatie in te vullen.</p>
                     <div id="tussenstops-lijst" class="space-y-3 pt-2"></div>
                 </div>
 
-                <!-- Opmerkingen -->
                 <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
                     <h3 class="text-sm font-bold text-blue-700 uppercase mb-2">Opmerkingen</h3>
                     <textarea id="v_opmerking" rows="3" class="w-full border rounded p-2 text-sm bg-white" placeholder="Bijzonderheden onderweg..."></textarea>
@@ -324,6 +340,30 @@
             document.getElementById('s_id').value = `${datum}-${tijd}-${typeSessie}`;
         }
 
+        function berekenDuur() {
+            const startVal = document.getElementById('s_start').value;
+            const stopVal = document.getElementById('s_stop').value;
+            if (!startVal || !stopVal) return;
+            const diffMs = new Date(stopVal) - new Date(startVal);
+            if (diffMs > 0) {
+                const diffHrs = Math.floor(diffMs / (1000 * 60 * 60));
+                const diffMins = Math.round((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+                document.getElementById('s_duur').value = `${diffHrs} uur en ${diffMins} min`;
+            }
+        }
+
+        function berekenUfAdvies() {
+            const pre = parseFloat(document.getElementById('s_pre').value) || 0;
+            const droog = parseFloat(document.getElementById('s_droog').value) || 109;
+            if (pre > 0) {
+                const advies = (pre - droog + 0.3).toFixed(2);
+                document.getElementById('s_uf_advies').value = advies + ' L';
+                document.getElementById('s_uf_ingeschat').value = advies;
+            }
+        }
+
+        function markeerHandmatigeStart() { handmatigeStartIngesteld = true; }
+
         async function laadGegevens() {
             const container = document.getElementById('sessie-lijst');
             document.getElementById('status-melding').textContent = 'Ophalen...';
@@ -341,14 +381,103 @@
                             <span class="text-xs text-blue-600 font-bold">ID: ${id}</span>
                             <h3 class="font-bold text-slate-800 mt-1">Type: ${item.type || item.Type}</h3>
                             <p class="text-xs text-slate-600">Start: ${item.start || item.Start}</p>
+                            <p class="text-xs text-slate-600">Stop: ${item.stop || item.Stop}</p>
                         </div>
-                        <div class="mt-4 pt-2 border-t flex justify-end gap-1.5">
-                            <button onclick="bewerkSessie('${id}')" class="bg-amber-500 text-white px-2.5 py-1 rounded text-xs">Bewerken</button>
-                            <button onclick="verwijderSessie('${id}')" class="bg-red-500 text-white px-2.5 py-1 rounded text-xs">Verwijderen</button>
+                        <div class="mt-4 pt-2 border-t flex justify-between items-center">
+                            <span class="text-xs text-slate-500">Duur: ${item.duur || item.Duur || '-'}</span>
+                            <div class="flex gap-1.5">
+                                <button onclick="genereerPdf('${id}')" class="bg-emerald-600 text-white px-2 py-1 rounded text-xs">PDF</button>
+                                <button onclick="bewerkSessie('${id}')" class="bg-amber-500 text-white px-2 py-1 rounded text-xs">Bewerken</button>
+                                <button onclick="verwijderSessie('${id}')" class="bg-red-500 text-white px-2 py-1 rounded text-xs">Verwijderen</button>
+                            </div>
                         </div>`;
                     container.appendChild(card);
                 });
             } catch (e) { document.getElementById('status-melding').textContent = 'Fout bij laden.'; }
+        }
+
+        function formatteerDatumVoorInput(d) {
+            if (!d) return '';
+            let str = String(d).trim();
+            if (str.startsWith("'")) str = str.substring(1);
+            if (str.includes('T')) return str.slice(0, 16);
+            return '';
+        }
+
+        // HERSTELDE BEWERK FUNCTIE VOOR DIALYSE
+        function bewerkSessie(id) {
+            const item = alleSessiesData.find(s => (s.id === id || s.ID === id));
+            if (!item) {
+                alert('Kon sessie niet vinden.');
+                return;
+            }
+
+            document.getElementById('form-titel').textContent = 'Sessie Bewerken: ' + id;
+            document.getElementById('s_id').value = item.id || item.ID || '';
+            document.getElementById('s_type').value = item.type || item.Type || 'Nacht';
+            document.getElementById('s_afspraak').value = formatteerDatumVoorInput(item.afspraak || item.Afspraak);
+            document.getElementById('s_start').value = formatteerDatumVoorInput(item.start || item.Start);
+            document.getElementById('s_stop').value = formatteerDatumVoorInput(item.stop || item.Stop);
+            document.getElementById('s_duur').value = item.duur || item.Duur || '';
+            
+            document.getElementById('s_aansluit').value = item.aansluit || item.Aansluit || '';
+            document.getElementById('s_droog').value = item.droog || item.Droog || '109';
+            document.getElementById('s_pre').value = item.pre || item.Pre || '';
+            document.getElementById('s_post').value = item.post || item.Post || '';
+            document.getElementById('s_uf_advies').value = item.uf_advies || item.Uf_advies || '';
+            document.getElementById('s_uf_ingeschat').value = item.uf_ingeschat || item.Uf_ingeschat || '';
+            document.getElementById('s_uf_werkelijk').value = item.uf_werkelijk || item.Uf_werkelijk || '';
+            
+            // Bloeddruk rijen herstellen
+            const bpContainer = document.getElementById('bloeddruk-lijst');
+            bpContainer.innerHTML = '';
+            const bpString = item.bovendruk || item.Bovendruk || '';
+            if (bpString) {
+                bpString.split(' | ').forEach(metingStr => {
+                    const tijdMatch = metingStr.match(/(\d{2}:\d{2})/);
+                    const nummers = metingStr.match(/\d+/g);
+                    if (nummers && nummers.length >= 3) {
+                        voegBloeddrukRijToe(tijdMatch ? tijdMatch[1] : '', nummers[nummers.length - 3], nummers[nummers.length - 2], nummers[nummers.length - 1]);
+                    } else {
+                        voegBloeddrukRijToe();
+                    }
+                });
+            } else {
+                voegBloeddrukRijToe();
+            }
+            
+            // Fragmin vinkjes
+            const f25Waarden = String(item.f25 || item.F25 || '').split(',').map(s => s.trim());
+            document.querySelectorAll('input[name="f25"]').forEach(cb => { cb.checked = f25Waarden.includes(cb.value); });
+            const f50Waarden = String(item.f50 || item.F50 || '').split(',').map(s => s.trim());
+            document.querySelectorAll('input[name="f50"]').forEach(cb => { cb.checked = f50Waarden.includes(cb.value); });
+
+            document.getElementById('chk_epo').checked = String(item.epo || item.Epo || '').toLowerCase() === 'ja';
+            document.getElementById('chk_ijzer').checked = String(item.ijzer || item.Ijzer || '').toLowerCase() === 'ja';
+            document.getElementById('chk_sf_meting').checked = String(item.sf_meting || item.Sf_meting || '').toLowerCase() === 'ja';
+            document.getElementById('s_sf_resultaat').value = item.sf_resultaat || item.Sf_resultaat || '';
+            
+            // Verpleging & Verslag
+            const opgeslagenVerpleging = String(item.verpleging || item.Verpleging || '').split(',').map(s => s.trim());
+            opgeslagenVerpleging.forEach(naam => { if (naam && !verplegingLijst.includes(naam)) verplegingLijst.push(naam); });
+            vulVerplegingDropdown();
+            const selectVerpl = document.getElementById('select_verpleging');
+            Array.from(selectVerpl.options).forEach(opt => { opt.selected = opgeslagenVerpleging.includes(opt.value); });
+
+            document.getElementById('s_verslag').value = item.verslag || item.Verslag || '';
+            wisselScherm('invoer');
+        }
+
+        async function verwijderSessie(id) {
+            if (!confirm('Sessie verwijderen?')) return;
+            try {
+                await fetch(WEB_APP_URL, {
+                    method: 'POST', mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'delete', id: id })
+                });
+                laadGegevens();
+            } catch (e) { alert('Fout: ' + e); }
         }
 
         function genereerPdf(id) {
@@ -458,7 +587,6 @@
             renderRouteKnoppen();
         }
 
-        // Vervoer overzicht met alle velden en PDF-knop
         async function laadVervoerGegevens() {
             const container = document.getElementById('vervoer-lijst');
             document.getElementById('vervoer-status-melding').textContent = 'Ophalen...';
@@ -483,9 +611,9 @@
                             <p class="text-xs text-slate-600 mt-1"><strong>Opmerking:</strong> ${item.opmerking || item.Opmerking || '-'}</p>
                         </div>
                         <div class="mt-4 pt-2 border-t flex justify-end gap-1.5">
-                            <button onclick="genereerVervoerPdf('${id}')" class="bg-emerald-600 text-white px-2.5 py-1 rounded text-xs hover:bg-emerald-700">PDF</button>
-                            <button onclick="bewerkVervoer('${id}')" class="bg-amber-500 text-white px-2.5 py-1 rounded text-xs hover:bg-amber-600">Bewerken</button>
-                            <button onclick="verwijderVervoer('${id}')" class="bg-red-500 text-white px-2.5 py-1 rounded text-xs hover:bg-red-600">Verwijderen</button>
+                            <button onclick="genereerVervoerPdf('${id}')" class="bg-emerald-600 text-white px-2.5 py-1 rounded text-xs">PDF</button>
+                            <button onclick="bewerkVervoer('${id}')" class="bg-amber-500 text-white px-2.5 py-1 rounded text-xs">Bewerken</button>
+                            <button onclick="verwijderVervoer('${id}')" class="bg-red-500 text-white px-2.5 py-1 rounded text-xs">Verwijderen</button>
                         </div>`;
                     container.appendChild(card);
                 });
@@ -536,10 +664,6 @@
                     <div style="background: #f8fafc; border: 1px solid #cbd5e1; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
                         <h3 style="margin: 0 0 8px 0; color: #1d4ed8; font-size: 14px; text-transform: uppercase;">Opmerkingen</h3>
                         <p style="margin: 0; font-size: 13px;">${item.opmerking || item.Opmerking || 'Geen opmerkingen.'}</p>
-                    </div>
-
-                    <div style="text-align: center; font-size: 10px; color: #94a3b8; border-top: 1px solid #cbd5e1; padding-top: 8px;">
-                        DataKluis Vervoersysteem • Vertrouwelijk Overzicht
                     </div>
                 </div>`;
 
@@ -603,14 +727,6 @@
             } catch (e) { alert('Fout: ' + e); }
         }
 
-        function formatteerDatumVoorInput(d) {
-            if (!d) return '';
-            let str = String(d).trim();
-            if (str.startsWith("'")) str = str.substring(1);
-            if (str.includes('T')) return str.slice(0, 16);
-            return '';
-        }
-
         function bewerkVervoer(id) {
             const item = alleVervoerData.find(s => (s.id === id || s.ID === id));
             if (!item) return;
@@ -637,8 +753,63 @@
 
         async function verstuurData(e) {
             e.preventDefault();
-            alert('Dialyse gegevens opgeslagen!');
-            wisselScherm('overzicht');
+            const btnOpslaan = document.getElementById('btn-opslaan');
+            btnOpslaan.textContent = 'Opslaan...'; btnOpslaan.disabled = true;
+
+            const bpRijen = document.querySelectorAll('#bloeddruk-lijst > div');
+            const bpArray = [];
+            bpRijen.forEach(rij => {
+                const tijd = rij.querySelector('.bp-tijd').value;
+                const boven = rij.querySelector('.bp-boven').value;
+                const onder = rij.querySelector('.bp-onder').value;
+                const hr = rij.querySelector('.bp-hr').value;
+                if (boven || onder || hr) {
+                    bpArray.push(`${tijd ? tijd + 'u -> ' : ''}${boven || '?'}/${onder || '?'} mmHg (HR: ${hr || '?'})`);
+                }
+            });
+
+            const currentId = document.getElementById('s_id').value;
+            const bestaatAl = alleSessiesData.some(s => (s.id === currentId || s.ID === currentId));
+            const actionType = bestaatAl ? 'update' : 'save';
+
+            const formData = {
+                action: actionType,
+                id: currentId,
+                type: document.getElementById('s_type').value,
+                afspraak: document.getElementById('s_afspraak').value,
+                start: document.getElementById('s_start').value,
+                stop: document.getElementById('s_stop').value,
+                duur: document.getElementById('s_duur').value,
+                aansluit: document.getElementById('s_aansluit').value,
+                droog: document.getElementById('s_droog').value,
+                pre: document.getElementById('s_pre').value,
+                post: document.getElementById('s_post').value,
+                uf_advies: document.getElementById('s_uf_advies').value,
+                uf_ingeschat: document.getElementById('s_uf_ingeschat').value,
+                uf_werkelijk: document.getElementById('s_uf_werkelijk').value,
+                bovendruk: bpArray.join(' | '),
+                onderdruk: '', 
+                hartslag: '',
+                f25: Array.from(document.querySelectorAll('input[name="f25"]:checked')).map(cb => cb.value).join(', '),
+                f50: Array.from(document.querySelectorAll('input[name="f50"]:checked')).map(cb => cb.value).join(', '),
+                epo: document.getElementById('chk_epo').checked ? 'Ja' : 'Nee',
+                ijzer: document.getElementById('chk_ijzer').checked ? 'Ja' : 'Nee',
+                sf_meting: document.getElementById('chk_sf_meting').checked ? 'Ja' : 'Nee',
+                sf_resultaat: document.getElementById('s_sf_resultaat').value,
+                verpleging: Array.from(document.getElementById('select_verpleging').selectedOptions).map(opt => opt.value).join(', '),
+                verslag: document.getElementById('s_verslag').value
+            };
+
+            try {
+                await fetch(WEB_APP_URL, {
+                    method: 'POST', mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                alert('Dialyse gegevens opgeslagen!');
+                wisselScherm('overzicht');
+            } catch (e) { alert('Fout: ' + e); }
+            finally { btnOpslaan.textContent = 'Opslaan'; btnOpslaan.disabled = false; }
         }
     </script>
 </body>
