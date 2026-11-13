@@ -123,22 +123,14 @@
                     </div>
                 </div>
 
-                <!-- 3. Bloeddruk & HR -->
-                <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
-                    <h3 class="text-sm font-bold text-blue-700 uppercase mb-3">3. Bloeddruk & HR</h3>
-                    <div class="grid grid-cols-3 gap-3">
-                        <div>
-                            <label class="block text-xs font-medium text-slate-600">Bovendruk</label>
-                            <input type="number" id="s_bovendruk" placeholder="120" class="w-full border rounded p-2 text-sm bg-white">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-slate-600">Onderdruk</label>
-                            <input type="number" id="s_onderdruk" placeholder="80" class="w-full border rounded p-2 text-sm bg-white">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-slate-600">Hartslag</label>
-                            <input type="number" id="s_hartslag" placeholder="70" class="w-full border rounded p-2 text-sm bg-white">
-                        </div>
+                <!-- 3. Bloeddruk & Hartslag (Meerdere Metingen) -->
+                <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-3">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-sm font-bold text-blue-700 uppercase">3. Bloeddruk & Hartslag (Meerdere Metingen)</h3>
+                        <button type="button" onclick="voegBloeddrukRijToe()" class="bg-blue-600 text-white px-2.5 py-1 rounded text-xs hover:bg-blue-700">＋ Meting Toevoegen</button>
+                    </div>
+                    <div id="bloeddruk-lijst" class="space-y-2">
+                        <!-- Dynamische rijen voor bloeddruk -->
                     </div>
                 </div>
 
@@ -223,6 +215,7 @@
         window.addEventListener('DOMContentLoaded', () => {
             vulVerplegingDropdown();
             laadGegevens();
+            voegBloeddrukRijToe(); // Start met 1 lege bloeddrukrij
         });
 
         function nieuweMetingFormulier() {
@@ -234,8 +227,28 @@
             document.getElementById('s_afspraak').value = isoNu;
             document.getElementById('s_start').value = isoNu;
             handmatigeStartIngesteld = false;
+            
+            document.getElementById('bloeddruk-lijst').innerHTML = '';
+            voegBloeddrukRijToe();
+
             updateAfspraakEnID();
             wisselScherm('invoer');
+        }
+
+        // Functies voor meerdere bloeddrukmetingen
+        function voegBloeddrukRijToe(tijd = '', bovendruk = '', onderdruk = '', hartslag = '') {
+            const container = document.getElementById('bloeddruk-lijst');
+            const div = document.createElement('div');
+            div.className = 'flex gap-2 items-center bg-white p-2 rounded border border-slate-200';
+            div.innerHTML = `
+                <input type="time" class="bp-tijd border rounded p-1 text-xs bg-white" value="${tijd}" title="Tijdstip">
+                <input type="number" class="bp-boven border rounded p-1 text-xs w-20 bg-white" placeholder="Bovendruk" value="${bovendruk}">
+                <span class="text-xs text-slate-400">/</span>
+                <input type="number" class="bp-onder border rounded p-1 text-xs w-20 bg-white" placeholder="Onderdruk" value="${onderdruk}">
+                <input type="number" class="bp-hr border rounded p-1 text-xs w-20 bg-white" placeholder="Hartslag" value="${hartslag}">
+                <button type="button" onclick="this.parentElement.remove()" class="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600 ml-auto">✕</button>
+            `;
+            container.appendChild(div);
         }
 
         function vulVerplegingDropdown() {
@@ -381,8 +394,8 @@
                             <span class="text-xs text-slate-500">Duur: ${sessionDuur}</span>
                             <div class="flex gap-1.5">
                                 <button onclick="genereerPdf('${sessionId}')" class="bg-emerald-600 text-white px-2 py-1 rounded text-xs hover:bg-emerald-700">PDF</button>
-                                <button onclick="bewerkSessie('${sessionId}')" class="bg-amber-500 text-white px-2.5 py-1 rounded text-xs hover:bg-amber-600">Bewerken</button>
-                                <button onclick="verwijderSessie('${sessionId}')" class="bg-red-500 text-white px-2.5 py-1 rounded text-xs hover:bg-red-600">Verwijderen</button>
+                                <button onclick="bewerkSessie('${sessionId}')" class="bg-amber-500 text-white px-2 py-1 rounded text-xs hover:bg-amber-600">Bewerken</button>
+                                <button onclick="verwijderSessie('${sessionId}')" class="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600">Verwijderen</button>
                             </div>
                         </div>
                     `;
@@ -393,12 +406,21 @@
             }
         }
 
-        // Directe PDF generatie zonder verborgen elementen
+        // Directe PDF generatie met meerdere bloeddrukmetingen
         function genereerPdf(id) {
             const item = alleSessiesData.find(s => (s.id === id || s.ID === id));
             if (!item) {
                 alert('Kon gegevens voor deze sessie niet vinden.');
                 return;
+            }
+
+            // Bloeddruk string opsplitsen voor nette weergave in PDF
+            let bpHtml = '';
+            const bpString = item.bovendruk || item.Bovendruk || '';
+            if (bpString) {
+                bpHtml = bpString.split(' | ').map(meting => `<div style="padding: 2px 0;">• ${meting}</div>`).join('');
+            } else {
+                bpHtml = 'Geen bloeddrukmetingen genoteerd.';
             }
 
             const element = document.createElement('div');
@@ -439,10 +461,14 @@
                     </div>
 
                     <div style="background: #f8fafc; border: 1px solid #cbd5e1; padding: 12px; border-radius: 6px; margin-bottom: 15px;">
-                        <h3 style="margin: 0 0 8px 0; color: #1d4ed8; font-size: 14px; text-transform: uppercase;">3. Bloeddruk, HR & Toedingeningen</h3>
+                        <h3 style="margin: 0 0 8px 0; color: #1d4ed8; font-size: 14px; text-transform: uppercase;">3. Bloeddruk & Hartslag Overzicht</h3>
+                        <div style="font-size: 13px;">${bpHtml}</div>
+                    </div>
+
+                    <div style="background: #f8fafc; border: 1px solid #cbd5e1; padding: 12px; border-radius: 6px; margin-bottom: 15px;">
+                        <h3 style="margin: 0 0 8px 0; color: #1d4ed8; font-size: 14px; text-transform: uppercase;">4. Toedingeningen</h3>
                         <table style="width: 100%; font-size: 13px; border-collapse: collapse;">
-                            <tr><td style="padding: 3px 0; font-weight: bold; width: 35%;">Bloeddruk / Hartslag:</td><td>${item.bovendruk || item.Bovendruk || '-'}/${item.onderdruk || item.Onderdruk || '-'} mmHg (${item.hartslag || item.Hartslag || '-'} bpm)</td></tr>
-                            <tr><td style="padding: 3px 0; font-weight: bold;">Fragmin 2500:</td><td>${item.f25 || item.F25 || 'Geen'}</td></tr>
+                            <tr><td style="padding: 3px 0; font-weight: bold; width: 35%;">Fragmin 2500:</td><td>${item.f25 || item.F25 || 'Geen'}</td></tr>
                             <tr><td style="padding: 3px 0; font-weight: bold;">Fragmin 5000:</td><td>${item.f50 || item.F50 || 'Geen'}</td></tr>
                             <tr><td style="padding: 3px 0; font-weight: bold;">Epo / IJzer:</td><td>${item.epo || item.Epo || 'Nee'} / ${item.ijzer || item.Ijzer || 'Nee'}</td></tr>
                             <tr><td style="padding: 3px 0; font-weight: bold;">Shuntflow meting:</td><td>${item.sf_meting || item.Sf_meting || 'Nee'} (${item.sf_resultaat || item.Sf_resultaat || '-'} ml/min)</td></tr>
@@ -450,7 +476,7 @@
                     </div>
 
                     <div style="background: #f8fafc; border: 1px solid #cbd5e1; padding: 12px; border-radius: 6px; margin-bottom: 15px;">
-                        <h3 style="margin: 0 0 8px 0; color: #1d4ed8; font-size: 14px; text-transform: uppercase;">4. Verpleging & Verslag</h3>
+                        <h3 style="margin: 0 0 8px 0; color: #1d4ed8; font-size: 14px; text-transform: uppercase;">5. Verpleging & Verslag</h3>
                         <p style="margin: 0 0 6px 0; font-size: 13px;"><strong>Verpleging:</strong> ${item.verpleging || item.Verpleging || 'Niet opgegeven'}</p>
                         <p style="margin: 0; font-size: 13px;"><strong>Bijzonderheden:</strong><br>${item.verslag || item.Verslag || 'Geen bijzonderheden.'}</p>
                     </div>
@@ -472,36 +498,24 @@
             html2pdf().from(element).set(opt).save();
         }
 
-        // Tijdzone-immuune datum parser
         function formatteerDatumVoorInput(datumString) {
             if (!datumString) return '';
-            
             let str = String(datumString).trim();
             if (str.startsWith("'")) str = str.substring(1);
-            
-            if (str.includes('T')) {
-                return str.slice(0, 16);
-            }
+            if (str.includes('T')) return str.slice(0, 16);
             
             const matches = str.match(/(\d{1,4})/g);
             if (matches && matches.length >= 5) {
                 let jaar, maand, dag, uur, minuut;
                 if (matches[0].length === 4) {
-                    jaar = matches[0];
-                    maand = matches[1].padStart(2, '0');
-                    dag = matches[2].padStart(2, '0');
-                    uur = matches[3].padStart(2, '0');
-                    minuut = matches[4].padStart(2, '0');
+                    jaar = matches[0]; maand = matches[1].padStart(2, '0'); dag = matches[2].padStart(2, '0');
+                    uur = matches[3].padStart(2, '0'); minuut = matches[4].padStart(2, '0');
                 } else {
-                    dag = matches[0].padStart(2, '0');
-                    maand = matches[1].padStart(2, '0');
-                    jaar = matches[2];
-                    uur = matches[3].padStart(2, '0');
-                    minuut = matches[4].padStart(2, '0');
+                    dag = matches[0].padStart(2, '0'); maand = matches[1].padStart(2, '0'); jaar = matches[2];
+                    uur = matches[3].padStart(2, '0'); minuut = matches[4].padStart(2, '0');
                 }
                 return `${jaar}-${maand}-${dag}T${uur}:${minuut}`;
             }
-            
             return '';
         }
 
@@ -526,9 +540,29 @@
             document.getElementById('s_uf_ingeschat').value = item.uf_ingeschat || item.Uf_ingeschat || '';
             document.getElementById('s_uf_werkelijk').value = item.uf_werkelijk || item.Uf_werkelijk || '';
             
-            document.getElementById('s_bovendruk').value = item.bovendruk || item.Bovendruk || '';
-            document.getElementById('s_onderdruk').value = item.onderdruk || item.Onderdruk || '';
-            document.getElementById('s_hartslag').value = item.hartslag || item.Hartslag || '';
+            // Meerdere bloeddrukmetingen inladen bij bewerken
+            const bpContainer = document.getElementById('bloeddruk-lijst');
+            bpContainer.innerHTML = '';
+            const bpString = item.bovendruk || item.Bovendruk || '';
+            if (bpString) {
+                bpString.split(' | ').forEach(metingStr => {
+                    // Verwacht formaat: "22:30 -> 120/80 (HR: 70)" of soortgelijk
+                    // We parsen dit netjes terug naar de invoervelden
+                    const tijdMatch = metingStr.match(/(\d{2}:\d{2})/);
+                    const nummers = metingStr.match(/\d+/g);
+                    if (nummers && nummers.length >= 3) {
+                        const tijd = tijdMatch ? tijdMatch[1] : '';
+                        const boven = nummers[nummers.length - 3];
+                        const onder = nummers[nummers.length - 2];
+                        const hr = nummers[nummers.length - 1];
+                        voegBloeddrukRijToe(tijd, boven, onder, hr);
+                    } else {
+                        voegBloeddrukRijToe();
+                    }
+                });
+            } else {
+                voegBloeddrukRijToe();
+            }
             
             const f25Waarden = String(item.f25 || item.F25 || '').split(',').map(s => s.trim());
             document.querySelectorAll('input[name="f25"]').forEach(cb => {
@@ -587,6 +621,20 @@
             btnOpslaan.textContent = 'Opslaan...';
             btnOpslaan.disabled = true;
 
+            // Verzamel alle bloeddrukmetingen uit de rijen
+            const bpRijen = document.querySelectorAll('#bloeddruk-lijst > div');
+            const bpArray = [];
+            bpRijen.forEach(rij => {
+                const tijd = rij.querySelector('.bp-tijd').value;
+                const boven = rij.querySelector('.bp-boven').value;
+                const onder = rij.querySelector('.bp-onder').value;
+                const hr = rij.querySelector('.bp-hr').value;
+                if (boven || onder || hr) {
+                    bpArray.push(`${tijd ? tijd + 'u -> ' : ''}${boven || '?'}/${onder || '?'} mmHg (HR: ${hr || '?'})`);
+                }
+            });
+            const bloeddrukDataTekst = bpArray.join(' | ');
+
             const currentId = document.getElementById('s_id').value;
             const bestaatAl = alleSessiesData.some(s => (s.id === currentId || s.ID === currentId));
             const actionType = bestaatAl ? 'update' : 'save';
@@ -606,9 +654,9 @@
                 uf_advies: document.getElementById('s_uf_advies').value,
                 uf_ingeschat: document.getElementById('s_uf_ingeschat').value,
                 uf_werkelijk: document.getElementById('s_uf_werkelijk').value,
-                bovendruk: document.getElementById('s_bovendruk').value,
-                onderdruk: document.getElementById('s_onderdruk').value,
-                hartslag: document.getElementById('s_hartslag').value,
+                bovendruk: bloeddrukDataTekst, // Bevat nu alle metingen gebundeld
+                onderdruk: '', 
+                hartslag: '',
                 f25: Array.from(document.querySelectorAll('input[name="f25"]:checked')).map(cb => cb.value).join(', '),
                 f50: Array.from(document.querySelectorAll('input[name="f50"]:checked')).map(cb => cb.value).join(', '),
                 epo: document.getElementById('chk_epo').checked ? 'Ja' : 'Nee',
