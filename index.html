@@ -2,16 +2,26 @@
 <html lang="nl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>DataKluis - Dialyse & Vervoer Dashboard</title>
+    
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- PDF Export bibliotheek -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22DataKluis%20Dialyse%22%2C%22short_name%22%3A%22DataKluis%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23f1f5f9%22%2C%22theme_color%22%3A%22%231d4ed8%22%7D">
+    
+    <!-- PWA Standalone Manifest -->
+    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22DataKluis%20Dialyse%20%26%20Vervoer%22%2C%22short_name%22%3A%22DataKluis%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23f1f5f9%22%2C%22theme_color%22%3A%22%231d4ed8%22%2C%22icons%22%3A%5B%5D%7D">
+    
+    <!-- Apple Web App instellingen voor iPhone/iPad -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="DataKluis">
 </head>
 <body class="bg-slate-100 min-h-screen flex flex-col">
 
     <!-- Navigatiebalk -->
-    <nav class="bg-blue-700 text-white shadow-md">
+    <nav class="bg-blue-700 text-white shadow-md sticky top-0 z-50">
         <div class="container mx-auto px-4 py-3 flex flex-wrap justify-between items-center">
             <h1 class="text-xl font-bold">DataKluis • Dialyse Luuk</h1>
             <div class="flex flex-wrap gap-2 mt-2 sm:mt-0">
@@ -215,7 +225,7 @@
     </main>
 
     <footer class="bg-white border-t py-3 text-center text-xs text-slate-500">
-        DataKluis • Werkt naadloos op PC, Laptop, Tablet en Telefoon
+        DataKluis Standalone • Werkt naadloos op PC, Tablet en Telefoon
     </footer>
 
     <!-- JavaScript Logica -->
@@ -404,13 +414,9 @@
             return '';
         }
 
-        // HERSTELDE BEWERK FUNCTIE VOOR DIALYSE
         function bewerkSessie(id) {
             const item = alleSessiesData.find(s => (s.id === id || s.ID === id));
-            if (!item) {
-                alert('Kon sessie niet vinden.');
-                return;
-            }
+            if (!item) { alert('Kon sessie niet vinden.'); return; }
 
             document.getElementById('form-titel').textContent = 'Sessie Bewerken: ' + id;
             document.getElementById('s_id').value = item.id || item.ID || '';
@@ -428,7 +434,6 @@
             document.getElementById('s_uf_ingeschat').value = item.uf_ingeschat || item.Uf_ingeschat || '';
             document.getElementById('s_uf_werkelijk').value = item.uf_werkelijk || item.Uf_werkelijk || '';
             
-            // Bloeddruk rijen herstellen
             const bpContainer = document.getElementById('bloeddruk-lijst');
             bpContainer.innerHTML = '';
             const bpString = item.bovendruk || item.Bovendruk || '';
@@ -438,15 +443,10 @@
                     const nummers = metingStr.match(/\d+/g);
                     if (nummers && nummers.length >= 3) {
                         voegBloeddrukRijToe(tijdMatch ? tijdMatch[1] : '', nummers[nummers.length - 3], nummers[nummers.length - 2], nummers[nummers.length - 1]);
-                    } else {
-                        voegBloeddrukRijToe();
-                    }
+                    } else { voegBloeddrukRijToe(); }
                 });
-            } else {
-                voegBloeddrukRijToe();
-            }
+            } else { voegBloeddrukRijToe(); }
             
-            // Fragmin vinkjes
             const f25Waarden = String(item.f25 || item.F25 || '').split(',').map(s => s.trim());
             document.querySelectorAll('input[name="f25"]').forEach(cb => { cb.checked = f25Waarden.includes(cb.value); });
             const f50Waarden = String(item.f50 || item.F50 || '').split(',').map(s => s.trim());
@@ -457,7 +457,6 @@
             document.getElementById('chk_sf_meting').checked = String(item.sf_meting || item.Sf_meting || '').toLowerCase() === 'ja';
             document.getElementById('s_sf_resultaat').value = item.sf_resultaat || item.Sf_resultaat || '';
             
-            // Verpleging & Verslag
             const opgeslagenVerpleging = String(item.verpleging || item.Verpleging || '').split(',').map(s => s.trim());
             opgeslagenVerpleging.forEach(naam => { if (naam && !verplegingLijst.includes(naam)) verplegingLijst.push(naam); });
             vulVerplegingDropdown();
@@ -488,7 +487,6 @@
             html2pdf().from(element).save(`Dialyse-${id}.pdf`);
         }
 
-        // --- VERVOER & GPS LOGICA ---
         function nieuwVervoerFormulier() {
             document.getElementById('vervoer-form').reset();
             document.getElementById('vervoer-form-titel').textContent = 'Nieuwe Rit Invoeren';
@@ -611,9 +609,9 @@
                             <p class="text-xs text-slate-600 mt-1"><strong>Opmerking:</strong> ${item.opmerking || item.Opmerking || '-'}</p>
                         </div>
                         <div class="mt-4 pt-2 border-t flex justify-end gap-1.5">
-                            <button onclick="genereerVervoerPdf('${id}')" class="bg-emerald-600 text-white px-2.5 py-1 rounded text-xs">PDF</button>
-                            <button onclick="bewerkVervoer('${id}')" class="bg-amber-500 text-white px-2.5 py-1 rounded text-xs">Bewerken</button>
-                            <button onclick="verwijderVervoer('${id}')" class="bg-red-500 text-white px-2.5 py-1 rounded text-xs">Verwijderen</button>
+                            <button onclick="genereerVervoerPdf('${id}')" class="bg-emerald-600 text-white px-2.5 py-1 rounded text-xs hover:bg-emerald-700">PDF</button>
+                            <button onclick="bewerkVervoer('${id}')" class="bg-amber-500 text-white px-2.5 py-1 rounded text-xs hover:bg-amber-600">Bewerken</button>
+                            <button onclick="verwijderVervoer('${id}')" class="bg-red-500 text-white px-2.5 py-1 rounded text-xs hover:bg-red-600">Verwijderen</button>
                         </div>`;
                     container.appendChild(card);
                 });
@@ -628,9 +626,7 @@
             const tsString = item.tussenstops || item.Tussenstops || '';
             if (tsString) {
                 tsHtml = tsString.split(' | ').map(t => `<div style="padding: 2px 0;">• ${t}</div>`).join('');
-            } else {
-                tsHtml = 'Geen tussenstops.';
-            }
+            } else { tsHtml = 'Geen tussenstops.'; }
 
             const element = document.createElement('div');
             element.innerHTML = `
