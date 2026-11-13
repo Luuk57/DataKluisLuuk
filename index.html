@@ -390,17 +390,22 @@
             }
         }
 
+        // Functie om opgeslagen data direct terug te zetten in de velden bij bewerken
         function bewerkSessie(id) {
             const item = alleSessiesData.find(s => (s.id === id || s.ID === id));
             if (!item) return;
 
             document.getElementById('form-titel').textContent = 'Sessie Bewerken: ' + id;
+            
+            // 1. Afspraken & Tijden
             document.getElementById('s_id').value = item.id || item.ID || '';
             document.getElementById('s_type').value = item.type || item.Type || 'Nacht';
             document.getElementById('s_afspraak').value = item.afspraak || item.Afspraak || '';
             document.getElementById('s_start').value = item.start || item.Start || '';
             document.getElementById('s_stop').value = item.stop || item.Stop || '';
             document.getElementById('s_duur').value = item.duur || item.Duur || '';
+            
+            // 2. Gewicht & UF
             document.getElementById('s_aansluit').value = item.aansluit || item.Aansluit || '';
             document.getElementById('s_droog').value = item.droog || item.Droog || '109';
             document.getElementById('s_pre').value = item.pre || item.Pre || '';
@@ -408,10 +413,35 @@
             document.getElementById('s_uf_advies').value = item.uf_advies || item.Uf_advies || '';
             document.getElementById('s_uf_ingeschat').value = item.uf_ingeschat || item.Uf_ingeschat || '';
             document.getElementById('s_uf_werkelijk').value = item.uf_werkelijk || item.Uf_werkelijk || '';
+            
+            // 3. Bloeddruk & HR
             document.getElementById('s_bovendruk').value = item.bovendruk || item.Bovendruk || '';
             document.getElementById('s_onderdruk').value = item.onderdruk || item.Onderdruk || '';
             document.getElementById('s_hartslag').value = item.hartslag || item.Hartslag || '';
+            
+            // 4. Toedingeningen (Checkboxes voor Fragmin 2500 & 5000)
+            const f25Waarden = String(item.f25 || item.F25 || '').split(',').map(s => s.trim());
+            document.querySelectorAll('input[name="f25"]').forEach(cb => {
+                cb.checked = f25Waarden.includes(cb.value);
+            });
+
+            const f50Waarden = String(item.f50 || item.F50 || '').split(',').map(s => s.trim());
+            document.querySelectorAll('input[name="f50"]').forEach(cb => {
+                cb.checked = f50Waarden.includes(cb.value);
+            });
+
+            document.getElementById('chk_epo').checked = String(item.epo || item.Epo || '').toLowerCase() === 'ja';
+            document.getElementById('chk_ijzer').checked = String(item.ijzer || item.Ijzer || '').toLowerCase() === 'ja';
+            document.getElementById('chk_sf_meting').checked = String(item.sf_meting || item.Sf_meting || '').toLowerCase() === 'ja';
             document.getElementById('s_sf_resultaat').value = item.sf_resultaat || item.Sf_resultaat || '';
+            
+            // 5. Verpleging & Verslag
+            const opgeslagenVerpleging = String(item.verpleging || item.Verpleging || '').split(',').map(s => s.trim());
+            const selectVerpl = document.getElementById('select_verpleging');
+            Array.from(selectVerpl.options).forEach(opt => {
+                opt.selected = opgeslagenVerpleging.includes(opt.value);
+            });
+
             document.getElementById('s_verslag').value = item.verslag || item.Verslag || '';
 
             wisselScherm('invoer');
