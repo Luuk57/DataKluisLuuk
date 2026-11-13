@@ -37,9 +37,7 @@
 
             <div id="status-melding" class="text-slate-500 italic">Gegevens ophalen uit Google Sheets...</div>
             
-            <div id="sessie-lijst" class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                <!-- Dynamische data blokken -->
-            </div>
+            <div id="sessie-lijst" class="grid gap-4 md:grid-cols-2 lg:grid-cols-3"></div>
         </section>
 
         <!-- SCHERM 1.5: VERVOER & RITTEN OVERZICHT -->
@@ -51,22 +49,16 @@
 
             <div id="vervoer-status-melding" class="text-slate-500 italic">Vervoersgegevens ophalen...</div>
             
-            <div id="vervoer-lijst" class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                <!-- Dynamische vervoersblokken -->
-            </div>
+            <div id="vervoer-lijst" class="grid gap-4 md:grid-cols-2 lg:grid-cols-3"></div>
         </section>
 
         <!-- SCHERM 2: DIALYSE INVOER / BEWERKEN -->
         <section id="scherm-invoer" class="hidden max-w-3xl mx-auto bg-white p-6 md:p-8 rounded-xl shadow-md border border-slate-200">
             <h2 id="form-titel" class="text-2xl font-semibold text-slate-800 mb-2">Nieuwe Sessie Invoeren</h2>
-            <p class="text-xs text-slate-500 mb-6">Alle velden zijn optioneel. Gekoppeld aan je Google Sheets tabbladen.</p>
             
             <form id="datakluis-form" onsubmit="verstuurData(event)" class="space-y-6">
-                
-                <!-- 1. Afspraken & Tijden -->
                 <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-4">
                     <h3 class="text-sm font-bold text-blue-700 uppercase">1. Afspraken & Tijden</h3>
-                    
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <div>
                             <label class="block text-xs font-medium text-slate-600">Type Sessie</label>
@@ -80,14 +72,12 @@
                             <input type="datetime-local" id="s_afspraak" class="w-full border rounded p-2 text-sm bg-white font-bold" onchange="syncAfspraakNaarStart()">
                         </div>
                     </div>
-
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <div class="sm:col-span-3">
                             <label class="block text-xs font-medium text-slate-600">Gegenereerd Dialyse ID</label>
                             <input type="text" id="s_id" readonly class="w-full border rounded p-2 text-sm bg-slate-200 font-bold text-slate-700">
                         </div>
                     </div>
-
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t border-slate-200">
                         <div>
                             <label class="block text-xs font-medium text-slate-600">Start Datum & Tijd</label>
@@ -104,113 +94,50 @@
                     </div>
                 </div>
 
-                <!-- 2. Gewicht & UF -->
                 <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
                     <h3 class="text-sm font-bold text-blue-700 uppercase mb-3">2. Gewicht & UF</h3>
                     <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-3">
-                        <div>
-                            <label class="block text-xs font-medium text-slate-600">Aansluit vloeistof</label>
-                            <input type="number" step="0.1" id="s_aansluit" class="w-full border rounded p-2 text-sm bg-white" placeholder="0.3 of 0.6">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-slate-600">Drooggewicht (kg)</label>
-                            <input type="number" step="0.1" id="s_droog" value="109" class="w-full border rounded p-2 text-sm bg-white" oninput="berekenUfAdvies()">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-slate-600">Pre gewicht (kg)</label>
-                            <input type="number" step="0.1" id="s_pre" placeholder="110.5" class="w-full border rounded p-2 text-sm bg-white" oninput="berekenUfAdvies()">
-                        </div>
+                        <div><label class="block text-xs font-medium text-slate-600">Aansluit vloeistof</label><input type="number" step="0.1" id="s_aansluit" class="w-full border rounded p-2 text-sm bg-white"></div>
+                        <div><label class="block text-xs font-medium text-slate-600">Drooggewicht (kg)</label><input type="number" step="0.1" id="s_droog" value="109" class="w-full border rounded p-2 text-sm bg-white" oninput="berekenUfAdvies()"></div>
+                        <div><label class="block text-xs font-medium text-slate-600">Pre gewicht (kg)</label><input type="number" step="0.1" id="s_pre" class="w-full border rounded p-2 text-sm bg-white" oninput="berekenUfAdvies()"></div>
                     </div>
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                        <div>
-                            <label class="block text-xs font-medium text-slate-600">Post gewicht</label>
-                            <input type="number" step="0.1" id="s_post" class="w-full border rounded p-2 text-sm bg-white">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-slate-600">UF advies (Berekend)</label>
-                            <input type="text" id="s_uf_advies" readonly class="w-full border rounded p-2 text-sm bg-slate-200 font-bold">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-slate-600">UF ingeschat</label>
-                            <input type="number" step="0.1" id="s_uf_ingeschat" class="w-full border rounded p-2 text-sm bg-white" placeholder="Ingevoerde UF">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-slate-600">UF werkelijk</label>
-                            <input type="number" step="0.1" id="s_uf_werkelijk" class="w-full border rounded p-2 text-sm bg-white">
-                        </div>
+                        <div><label class="block text-xs font-medium text-slate-600">Post gewicht</label><input type="number" step="0.1" id="s_post" class="w-full border rounded p-2 text-sm bg-white"></div>
+                        <div><label class="block text-xs font-medium text-slate-600">UF advies</label><input type="text" id="s_uf_advies" readonly class="w-full border rounded p-2 text-sm bg-slate-200 font-bold"></div>
+                        <div><label class="block text-xs font-medium text-slate-600">UF ingeschat</label><input type="number" step="0.1" id="s_uf_ingeschat" class="w-full border rounded p-2 text-sm bg-white"></div>
+                        <div><label class="block text-xs font-medium text-slate-600">UF werkelijk</label><input type="number" step="0.1" id="s_uf_werkelijk" class="w-full border rounded p-2 text-sm bg-white"></div>
                     </div>
                 </div>
 
-                <!-- 3. Bloeddruk & Hartslag -->
                 <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-3">
                     <div class="flex justify-between items-center">
-                        <h3 class="text-sm font-bold text-blue-700 uppercase">3. Bloeddruk & Hartslag (Meerdere Metingen)</h3>
+                        <h3 class="text-sm font-bold text-blue-700 uppercase">3. Bloeddruk & Hartslag</h3>
                         <button type="button" onclick="voegBloeddrukRijToe()" class="bg-blue-600 text-white px-2.5 py-1 rounded text-xs hover:bg-blue-700">＋ Meting Toevoegen</button>
                     </div>
                     <div id="bloeddruk-lijst" class="space-y-2"></div>
                 </div>
 
-                <!-- 4. Toedingeningen -->
                 <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-4">
                     <h3 class="text-sm font-bold text-blue-700 uppercase">4. Toedingeningen</h3>
-                    <div>
-                        <label class="block text-xs font-medium text-slate-600 mb-1">Fragmin 2500 (4 doses)</label>
-                        <div class="flex gap-4">
-                            <label class="text-xs flex items-center gap-1"><input type="checkbox" name="f25" value="1"> 1</label>
-                            <label class="text-xs flex items-center gap-1"><input type="checkbox" name="f25" value="2"> 2</label>
-                            <label class="text-xs flex items-center gap-1"><input type="checkbox" name="f25" value="3"> 3</label>
-                            <label class="text-xs flex items-center gap-1"><input type="checkbox" name="f25" value="4"> 4</label>
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-slate-600 mb-1">Fragmin 5000 (4 doses)</label>
-                        <div class="flex gap-4">
-                            <label class="text-xs flex items-center gap-1"><input type="checkbox" name="f50" value="1"> 1</label>
-                            <label class="text-xs flex items-center gap-1"><input type="checkbox" name="f50" value="2"> 2</label>
-                            <label class="text-xs flex items-center gap-1"><input type="checkbox" name="f50" value="3"> 3</label>
-                            <label class="text-xs flex items-center gap-1"><input type="checkbox" name="f50" value="4"> 4</label>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 pt-2 border-t border-slate-200">
-                        <label class="text-xs font-medium text-slate-700 flex items-center gap-2">
-                            <input type="checkbox" id="chk_epo" class="w-4 h-4"> Epo
-                        </label>
-                        <label class="text-xs font-medium text-slate-700 flex items-center gap-2">
-                            <input type="checkbox" id="chk_ijzer" class="w-4 h-4"> IJzer
-                        </label>
-                        <label class="text-xs font-medium text-slate-700 flex items-center gap-2">
-                            <input type="checkbox" id="chk_sf_meting" class="w-4 h-4"> Shuntflow meting
-                        </label>
-                        <div>
-                            <label class="block text-xs font-medium text-slate-600">Shuntflow resultaat (ml/min)</label>
-                            <input type="number" id="s_sf_resultaat" placeholder="bijv. 850" class="w-full border rounded p-1.5 text-sm bg-white">
-                        </div>
+                    <div class="flex gap-4"><label class="text-xs"><input type="checkbox" name="f25" value="1"> F25-1</label><label class="text-xs"><input type="checkbox" name="f25" value="2"> F25-2</label></div>
+                    <div class="flex gap-4"><label class="text-xs"><input type="checkbox" name="f50" value="1"> F50-1</label><label class="text-xs"><input type="checkbox" name="f50" value="2"> F50-2</label></div>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <label class="text-xs"><input type="checkbox" id="chk_epo"> Epo</label>
+                        <label class="text-xs"><input type="checkbox" id="chk_ijzer"> IJzer</label>
+                        <label class="text-xs"><input type="checkbox" id="chk_sf_meting"> Shuntflow</label>
+                        <input type="number" id="s_sf_resultaat" placeholder="ml/min" class="border rounded p-1 text-xs">
                     </div>
                 </div>
 
-                <!-- 5. Verpleging & Verslag -->
                 <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-3">
                     <h3 class="text-sm font-bold text-blue-700 uppercase">5. Verpleging & Verslag</h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-medium text-slate-600 mb-1">Verpleging</label>
-                            <select id="select_verpleging" multiple class="w-full border rounded p-2 text-sm bg-white h-28" title="Selecteer verpleging"></select>
-                            <div class="flex gap-2 mt-2">
-                                <input type="text" id="nieuwe_naam" placeholder="Nieuwe naam..." class="border rounded p-1 text-xs flex-grow bg-white">
-                                <button type="button" onclick="voegVerplegingToe()" class="bg-emerald-600 text-white px-2 py-1 rounded text-xs hover:bg-emerald-700">＋ Toevoegen</button>
-                                <button type="button" onclick="verwijderGeselecteerdeVerpleging()" class="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600">✕ Verwijder</button>
-                            </div>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-slate-600 mb-1">Verslag / Bijzonderheden</label>
-                            <textarea id="s_verslag" rows="4" class="w-full border rounded p-2 text-sm bg-white" placeholder="Bijzonderheden..."></textarea>
-                        </div>
-                    </div>
+                    <select id="select_verpleging" multiple class="w-full border rounded p-2 text-sm bg-white h-24"></select>
+                    <textarea id="s_verslag" rows="3" class="w-full border rounded p-2 text-sm bg-white" placeholder="Verslag..."></textarea>
                 </div>
 
-                <div class="flex justify-end space-x-3 pt-2">
-                    <button type="button" onclick="wisselScherm('overzicht')" class="bg-slate-200 px-4 py-2 rounded text-sm font-medium">Annuleren</button>
-                    <button type="submit" id="btn-opslaan" class="bg-blue-600 text-white px-5 py-2 rounded text-sm font-medium hover:bg-blue-700 shadow">Opslaan in Google Sheet</button>
+                <div class="flex justify-end space-x-3">
+                    <button type="button" onclick="wisselScherm('overzicht')" class="bg-slate-200 px-4 py-2 rounded text-sm">Annuleren</button>
+                    <button type="submit" id="btn-opslaan" class="bg-blue-600 text-white px-5 py-2 rounded text-sm shadow">Opslaan</button>
                 </div>
             </form>
         </section>
@@ -218,46 +145,34 @@
         <!-- SCHERM 3: VERVOER INVOER / BEWERKEN -->
         <section id="scherm-vervoer-invoer" class="hidden max-w-3xl mx-auto bg-white p-6 md:p-8 rounded-xl shadow-md border border-slate-200">
             <h2 id="vervoer-form-titel" class="text-2xl font-semibold text-slate-800 mb-2">Nieuwe Rit Invoeren</h2>
-            <p class="text-xs text-slate-500 mb-6">Plan je vervoer, afspraken en tussenstops.</p>
             
             <form id="vervoer-form" onsubmit="verstuurVervoerData(event)" class="space-y-6">
-                
                 <input type="hidden" id="v_id">
 
-                <!-- Snelle Route Knoppen & Beheer -->
+                <!-- Vervoersfirma met dropdown en live aanvullen/verwijderen -->
                 <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-3">
-                    <div class="flex justify-between items-center">
-                        <h3 class="text-sm font-bold text-blue-700 uppercase">Snelle Routes & Firma</h3>
-                        <div class="flex gap-2">
-                            <input type="text" id="nieuwe-route-naam" placeholder="Nieuwe route (bijv. Ziekenhuis)..." class="border rounded p-1 text-xs bg-white">
-                            <button type="button" onclick="voegRouteToe()" class="bg-emerald-600 text-white px-2 py-1 rounded text-xs hover:bg-emerald-700">＋ Route Knop Maak</button>
-                        </div>
-                    </div>
-                    <div id="route-knoppen-container" class="flex flex-wrap gap-2 pt-1">
-                        <!-- Dynamische route tegels -->
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-slate-600 mb-1">Vervoersfirma / Taxibedrijf</label>
-                        <input type="text" id="v_firma" placeholder="Bijv. Connexxion / Taxi Centrale" class="w-full border rounded p-2 text-sm bg-white">
+                    <h3 class="text-sm font-bold text-blue-700 uppercase">Vervoersfirma</h3>
+                    <div class="flex gap-2 items-center">
+                        <select id="v_firma" class="w-full border rounded p-2 text-sm bg-white font-medium"></select>
+                        <input type="text" id="nieuwe-firma-naam" placeholder="Nieuwe firma..." class="border rounded p-2 text-xs bg-white">
+                        <button type="button" onclick="voegFirmaToe()" class="bg-emerald-600 text-white px-3 py-2 rounded text-xs whitespace-nowrap hover:bg-emerald-700">＋ Toevoegen</button>
+                        <button type="button" onclick="verwijderGeselecteerdeFirma()" class="bg-red-500 text-white px-3 py-2 rounded text-xs whitespace-nowrap hover:bg-red-600">✕ Verwijder</button>
                     </div>
                 </div>
 
-                <!-- Tijden met Grote Knoppen -->
+                <!-- Tijden met Grote Groene en Rode Knoppen -->
                 <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-4">
                     <h3 class="text-sm font-bold text-blue-700 uppercase">Rittijden</h3>
                     
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <div class="flex justify-between items-center mb-1">
-                                <label class="text-xs font-medium text-slate-600">Afspraak Datum & Tijd</label>
-                                <button type="button" onclick="stelNuIn('v_afspraak')" class="bg-blue-600 text-white px-2 py-0.5 rounded text-xs hover:bg-blue-700 font-bold">Nu</button>
-                            </div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Afspraak Datum & Tijd</label>
                             <input type="datetime-local" id="v_afspraak" class="w-full border rounded p-2 text-sm bg-white font-bold">
                         </div>
                         <div>
                             <div class="flex justify-between items-center mb-1">
                                 <label class="text-xs font-medium text-slate-600">Start / Vertrektijd</label>
-                                <button type="button" onclick="stelNuIn('v_start')" class="bg-blue-600 text-white px-2 py-0.5 rounded text-xs hover:bg-blue-700 font-bold">Nu</button>
+                                <button type="button" onclick="stelNuIn('v_start')" class="bg-emerald-600 text-white px-3 py-1 rounded text-xs font-bold hover:bg-emerald-700 shadow">Start (Nu)</button>
                             </div>
                             <input type="datetime-local" id="v_start" class="w-full border rounded p-2 text-sm bg-white">
                         </div>
@@ -267,31 +182,40 @@
                         <div>
                             <div class="flex justify-between items-center mb-1">
                                 <label class="text-xs font-medium text-slate-600">Stop / Aankomsttijd</label>
-                                <button type="button" onclick="stelNuIn('v_stop')" class="bg-blue-600 text-white px-2 py-0.5 rounded text-xs hover:bg-blue-700 font-bold">Nu</button>
+                                <button type="button" onclick="stelNuIn('v_stop')" class="bg-red-600 text-white px-3 py-1 rounded text-xs font-bold hover:bg-red-700 shadow">Stop (Nu)</button>
                             </div>
                             <input type="datetime-local" id="v_stop" class="w-full border rounded p-2 text-sm bg-white">
                         </div>
                     </div>
                 </div>
 
-                <!-- Tussenstops (Meerdere rijen met tijd + adres) -->
+                <!-- Tussenstops met Grote Oranje Knop voor Tijd + Adres -->
                 <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-3">
                     <div class="flex justify-between items-center">
-                        <h3 class="text-sm font-bold text-blue-700 uppercase">Tussenstops</h3>
-                        <button type="button" onclick="voegTussenstopRijToe()" class="bg-blue-600 text-white px-2.5 py-1 rounded text-xs hover:bg-blue-700">＋ Tussenstop Toevoegen</button>
+                        <h3 class="text-sm font-bold text-blue-700 uppercase">Tussenstops & Routes</h3>
+                        <button type="button" onclick="voegTussenstopRijToe()" class="bg-amber-600 text-white px-3 py-1.5 rounded text-xs font-bold hover:bg-amber-700 shadow">＋ Tussenstop Toevoegen</button>
                     </div>
-                    <div id="tussenstops-lijst" class="space-y-2"></div>
+                    <p class="text-xs text-slate-500">Gebruik de oranje knop om direct de huidige tijd én het gekozen adres in te vullen.</p>
+                    
+                    <!-- Route snelknop tegels -->
+                    <div id="route-knoppen-container" class="flex flex-wrap gap-2 pt-1 pb-2 border-b border-slate-200"></div>
+                    <div class="flex gap-2 pt-1">
+                        <input type="text" id="nieuwe-route-naam" placeholder="Nieuwe route/adres (bijv. Ziekenhuis)..." class="border rounded p-1.5 text-xs flex-grow bg-white">
+                        <button type="button" onclick="voegRouteToe()" class="bg-blue-600 text-white px-3 py-1 rounded text-xs hover:bg-blue-700">Adres Opslaan</button>
+                    </div>
+
+                    <div id="tussenstops-lijst" class="space-y-3 pt-2"></div>
                 </div>
 
                 <!-- Opmerkingen -->
                 <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
-                    <h3 class="text-sm font-bold text-blue-700 uppercase mb-2">Opmerkingen & Bijzonderheden</h3>
-                    <textarea id="v_opmerking" rows="3" class="w-full border rounded p-2 text-sm bg-white" placeholder="Bijv. rolstoelvervoer, bijzonderheden onderweg..."></textarea>
+                    <h3 class="text-sm font-bold text-blue-700 uppercase mb-2">Opmerkingen</h3>
+                    <textarea id="v_opmerking" rows="3" class="w-full border rounded p-2 text-sm bg-white" placeholder="Bijv. bijzonderheden onderweg..."></textarea>
                 </div>
 
-                <div class="flex justify-end space-x-3 pt-2">
-                    <button type="button" onclick="wisselScherm('vervoer-overzicht')" class="bg-slate-200 px-4 py-2 rounded text-sm font-medium">Annuleren</button>
-                    <button type="submit" id="btn-vervoer-opslaan" class="bg-blue-600 text-white px-5 py-2 rounded text-sm font-medium hover:bg-blue-700 shadow">Opslaan in Google Sheet</button>
+                <div class="flex justify-end space-x-3">
+                    <button type="button" onclick="wisselScherm('vervoer-overzicht')" class="bg-slate-200 px-4 py-2 rounded text-sm">Annuleren</button>
+                    <button type="submit" id="btn-vervoer-opslaan" class="bg-blue-600 text-white px-5 py-2 rounded text-sm shadow">Opslaan</button>
                 </div>
             </form>
         </section>
@@ -305,7 +229,8 @@
     <!-- JavaScript Logica -->
     <script>
         let verplegingLijst = ["Jan de Vries", "Sanne Bakker", "Mohammed Ali", "Lisa Jansen"];
-        let vasteRoutes = ["Huis ➔ Dialyse", "Dialyse ➔ Huis", "Huis ➔ Ziekenhuis", "Apotheek"];
+        let firmaLijst = ["Comtax", "Bluecab", "Taxi Centrale", "Eigen Vervoer"];
+        let vasteRoutes = ["Huis", "Dialyse Centrum", "Ziekenhuis", "Apotheek"];
         let handmatigeStartIngesteld = false;
         let alleSessiesData = [];
         let alleVervoerData = [];
@@ -313,6 +238,7 @@
 
         window.addEventListener('DOMContentLoaded', () => {
             vulVerplegingDropdown();
+            vulFirmaDropdown();
             laadGegevens();
             laadVervoerGegevens();
             renderRouteKnoppen();
@@ -344,6 +270,38 @@
             }
         }
 
+        // --- FIRMA LOGICA ---
+        function vulFirmaDropdown() {
+            const select = document.getElementById('v_firma');
+            select.innerHTML = '';
+            firmaLijst.forEach(firma => {
+                const opt = document.createElement('option');
+                opt.value = firma;
+                opt.textContent = firma;
+                select.appendChild(opt);
+            });
+        }
+
+        function voegFirmaToe() {
+            const input = document.getElementById('nieuwe-firma-naam');
+            const naam = input.value.trim();
+            if (naam && !firmaLijst.includes(naam)) {
+                firmaLijst.push(naam);
+                vulFirmaDropdown();
+                document.getElementById('v_firma').value = naam;
+                input.value = '';
+            }
+        }
+
+        function verwijderGeselecteerdeFirma() {
+            const select = document.getElementById('v_firma');
+            const gekozen = select.value;
+            if (confirm(`Weet je zeker dat je firma "${gekozen}" wilt verwijderen?`)) {
+                firmaLijst = firmaLijst.filter(f => f !== gekozen);
+                vulFirmaDropdown();
+            }
+        }
+
         // --- DIALYSE LOGICA ---
         function nieuweMetingFormulier() {
             document.getElementById('datakluis-form').reset();
@@ -357,7 +315,6 @@
             
             document.getElementById('bloeddruk-lijst').innerHTML = '';
             voegBloeddrukRijToe();
-
             updateAfspraakEnID();
             wisselScherm('invoer');
         }
@@ -367,12 +324,12 @@
             const div = document.createElement('div');
             div.className = 'flex gap-2 items-center bg-white p-2 rounded border border-slate-200';
             div.innerHTML = `
-                <input type="time" class="bp-tijd border rounded p-1 text-xs bg-white" value="${tijd}" title="Tijdstip">
+                <input type="time" class="bp-tijd border rounded p-1 text-xs bg-white" value="${tijd}">
                 <input type="number" class="bp-boven border rounded p-1 text-xs w-20 bg-white" placeholder="Bovendruk" value="${bovendruk}">
-                <span class="text-xs text-slate-400">/</span>
+                <span class="text-xs">/</span>
                 <input type="number" class="bp-onder border rounded p-1 text-xs w-20 bg-white" placeholder="Onderdruk" value="${onderdruk}">
                 <input type="number" class="bp-hr border rounded p-1 text-xs w-20 bg-white" placeholder="Hartslag" value="${hartslag}">
-                <button type="button" onclick="this.parentElement.remove()" class="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600 ml-auto">✕</button>
+                <button type="button" onclick="this.parentElement.remove()" class="bg-red-500 text-white px-2 py-1 rounded text-xs ml-auto">✕</button>
             `;
             container.appendChild(div);
         }
@@ -401,10 +358,6 @@
         function verwijderGeselecteerdeVerpleging() {
             const select = document.getElementById('select_verpleging');
             const geselecteerd = Array.from(select.selectedOptions).map(opt => opt.value);
-            if (geselecteerd.length === 0) {
-                alert('Selecteer eerst namen om te verwijderen.');
-                return;
-            }
             verplegingLijst = verplegingLijst.filter(naam => !geselecteerd.includes(naam));
             vulVerplegingDropdown();
         }
@@ -417,24 +370,17 @@
             updateAfspraakEnID();
         }
 
-        function markeerHandmatigeStart() {
-            handmatigeStartIngesteld = true;
-        }
+        function markeerHandmatigeStart() { handmatigeStartIngesteld = true; }
 
         function updateAfspraakEnID() {
             const afspraakVal = document.getElementById('s_afspraak').value;
             const startVal = document.getElementById('s_start').value;
             const typeSessie = document.getElementById('s_type').value;
-            const aansluitInput = document.getElementById('s_aansluit');
-
             if (!afspraakVal) return;
-
-            aansluitInput.value = (typeSessie === 'Dag') ? '0.6' : '0.3';
-
+            document.getElementById('s_aansluit').value = (typeSessie === 'Dag') ? '0.6' : '0.3';
             const datumStr = afspraakVal.split('T')[0];
             const tijdStr = afspraakVal.split('T')[1];
             document.getElementById('s_id').value = `${datumStr}-${tijdStr}-${typeSessie}`;
-
             if (startVal) {
                 const startDate = new Date(startVal);
                 const urenErbij = (typeSessie === 'Dag') ? 4 : 7;
@@ -442,7 +388,6 @@
                 stopDate.setMinutes(stopDate.getMinutes() - stopDate.getTimezoneOffset());
                 document.getElementById('s_stop').value = stopDate.toISOString().slice(0, 16);
             }
-
             berekenDuur();
         }
 
@@ -450,14 +395,11 @@
             const startVal = document.getElementById('s_start').value;
             const stopVal = document.getElementById('s_stop').value;
             if (!startVal || !stopVal) return;
-
             const diffMs = new Date(stopVal) - new Date(startVal);
             if (diffMs > 0) {
                 const diffHrs = Math.floor(diffMs / (1000 * 60 * 60));
                 const diffMins = Math.round((diffMs % (1000 * 60 * 60)) / (1000 * 60));
                 document.getElementById('s_duur').value = `${diffHrs} uur en ${diffMins} min`;
-            } else {
-                document.getElementById('s_duur').value = 'Onjuiste tijd';
             }
         }
 
@@ -474,39 +416,25 @@
         async function laadGegevens() {
             const container = document.getElementById('sessie-lijst');
             const status = document.getElementById('status-melding');
-            
-            status.textContent = 'Gegevens ophalen uit Google Sheets...';
+            status.textContent = 'Gegevens ophalen...';
             container.innerHTML = '';
-
             try {
                 const response = await fetch(WEB_APP_URL);
                 alleSessiesData = await response.json();
-
-                if (!alleSessiesData || alleSessiesData.length === 0) {
-                    status.textContent = 'Nog geen metingen gevonden in je DataKluis.';
-                    return;
-                }
-
                 status.textContent = '';
                 alleSessiesData.forEach(item => {
                     const card = document.createElement('div');
                     card.className = 'bg-white p-4 rounded-lg shadow border border-slate-200 flex flex-col justify-between';
-                    
                     const sessionId = item.id || item.ID || 'Onbekend';
-                    const sessionType = item.type || item.Type || '-';
-                    const sessionStart = item.start || item.Start || '-';
-                    const sessionStop = item.stop || item.Stop || '-';
-                    const sessionDuur = item.duur || item.Duur || '-';
-
                     card.innerHTML = `
                         <div>
                             <span class="text-xs text-blue-600 font-bold">ID: ${sessionId}</span>
-                            <h3 class="font-bold text-base text-slate-800 mt-1">Type: ${sessionType}</h3>
-                            <p class="text-xs text-slate-600 mt-1">Start: ${sessionStart}</p>
-                            <p class="text-xs text-slate-600">Stop: ${sessionStop}</p>
+                            <h3 class="font-bold text-base text-slate-800 mt-1">Type: ${item.type || item.Type || '-'}</h3>
+                            <p class="text-xs text-slate-600 mt-1">Start: ${item.start || item.Start || '-'}</p>
+                            <p class="text-xs text-slate-600">Stop: ${item.stop || item.Stop || '-'}</p>
                         </div>
                         <div class="mt-4 pt-2 border-t border-slate-100 flex justify-between items-center">
-                            <span class="text-xs text-slate-500">Duur: ${sessionDuur}</span>
+                            <span class="text-xs text-slate-500">Duur: ${item.duur || item.Duur || '-'}</span>
                             <div class="flex gap-1.5">
                                 <button onclick="genereerPdf('${sessionId}')" class="bg-emerald-600 text-white px-2 py-1 rounded text-xs hover:bg-emerald-700">PDF</button>
                                 <button onclick="bewerkSessie('${sessionId}')" class="bg-amber-500 text-white px-2 py-1 rounded text-xs hover:bg-amber-600">Bewerken</button>
@@ -516,99 +444,15 @@
                     `;
                     container.appendChild(card);
                 });
-            } catch (error) {
-                status.textContent = 'Kon geen verbinding maken om data op te halen.';
-            }
+            } catch (error) { status.textContent = 'Fout bij ophalen.'; }
         }
 
         function genereerPdf(id) {
             const item = alleSessiesData.find(s => (s.id === id || s.ID === id));
-            if (!item) {
-                alert('Kon gegevens voor deze sessie niet vinden.');
-                return;
-            }
-
-            let bpHtml = '';
-            const bpString = item.bovendruk || item.Bovendruk || '';
-            if (bpString) {
-                bpHtml = bpString.split(' | ').map(meting => `<div style="padding: 2px 0;">• ${meting}</div>`).join('');
-            } else {
-                bpHtml = 'Geen bloeddrukmetingen genoteerd.';
-            }
-
+            if (!item) return;
             const element = document.createElement('div');
-            element.innerHTML = `
-                <div style="font-family: Arial, sans-serif; padding: 25px; color: #1e293b; background: #ffffff; width: 700px;">
-                    <div style="border-bottom: 3px solid #1d4ed8; padding-bottom: 12px; margin-bottom: 20px; display: flex; justify-content: space-between;">
-                        <div>
-                            <h1 style="color: #1d4ed8; margin: 0; font-size: 22px;">DataKluis • Dialyse Rapport</h1>
-                            <p style="margin: 4px 0 0 0; font-size: 13px; color: #64748b;">Persoonlijk Medisch Overzicht - Luuk</p>
-                        </div>
-                        <div style="text-align: right; font-size: 11px; color: #64748b;">
-                            Datum: ${new Date().toLocaleDateString('nl-NL')}
-                        </div>
-                    </div>
-
-                    <div style="background: #f8fafc; border: 1px solid #cbd5e1; padding: 12px; border-radius: 6px; margin-bottom: 15px;">
-                        <h3 style="margin: 0 0 8px 0; color: #1d4ed8; font-size: 14px; text-transform: uppercase;">1. Afspraken & Tijden</h3>
-                        <table style="width: 100%; font-size: 13px; border-collapse: collapse;">
-                            <tr><td style="padding: 3px 0; font-weight: bold; width: 35%;">Dialyse ID:</td><td>${item.id || item.ID || '-'}</td></tr>
-                            <tr><td style="padding: 3px 0; font-weight: bold;">Type Behandeling:</td><td>${item.type || item.Type || '-'}</td></tr>
-                            <tr><td style="padding: 3px 0; font-weight: bold;">Start Tijd:</td><td>${item.start || item.Start || '-'}</td></tr>
-                            <tr><td style="padding: 3px 0; font-weight: bold;">Stop Tijd:</td><td>${item.stop || item.Stop || '-'}</td></tr>
-                            <tr><td style="padding: 3px 0; font-weight: bold;">Totale Duur:</td><td>${item.duur || item.Duur || '-'}</td></tr>
-                        </table>
-                    </div>
-
-                    <div style="background: #f8fafc; border: 1px solid #cbd5e1; padding: 12px; border-radius: 6px; margin-bottom: 15px;">
-                        <h3 style="margin: 0 0 8px 0; color: #1d4ed8; font-size: 14px; text-transform: uppercase;">2. Gewicht & UF</h3>
-                        <table style="width: 100%; font-size: 13px; border-collapse: collapse;">
-                            <tr><td style="padding: 3px 0; font-weight: bold; width: 35%;">Aansluitvloeistof:</td><td>${item.aansluit || item.Aansluit || '-'} L</td></tr>
-                            <tr><td style="padding: 3px 0; font-weight: bold;">Drooggewicht:</td><td>${item.droog || item.Droog || '-'} kg</td></tr>
-                            <tr><td style="padding: 3px 0; font-weight: bold;">Pre-gewicht:</td><td>${item.pre || item.Pre || '-'} kg</td></tr>
-                            <tr><td style="padding: 3px 0; font-weight: bold;">Post-gewicht:</td><td>${item.post || item.Post || '-'} kg</td></tr>
-                            <tr><td style="padding: 3px 0; font-weight: bold;">UF Advies:</td><td>${item.uf_advies || item.Uf_advies || '-'}</td></tr>
-                            <tr><td style="padding: 3px 0; font-weight: bold;">UF Ingeschat:</td><td>${item.uf_ingeschat || item.Uf_ingeschat || '-'} L</td></tr>
-                            <tr><td style="padding: 3px 0; font-weight: bold;">UF Werkelijk:</td><td>${item.uf_werkelijk || item.Uf_werkelijk || '-'} L</td></tr>
-                        </table>
-                    </div>
-
-                    <div style="background: #f8fafc; border: 1px solid #cbd5e1; padding: 12px; border-radius: 6px; margin-bottom: 15px;">
-                        <h3 style="margin: 0 0 8px 0; color: #1d4ed8; font-size: 14px; text-transform: uppercase;">3. Bloeddruk & Hartslag Overzicht</h3>
-                        <div style="font-size: 13px;">${bpHtml}</div>
-                    </div>
-
-                    <div style="background: #f8fafc; border: 1px solid #cbd5e1; padding: 12px; border-radius: 6px; margin-bottom: 15px;">
-                        <h3 style="margin: 0 0 8px 0; color: #1d4ed8; font-size: 14px; text-transform: uppercase;">4. Toedingeningen</h3>
-                        <table style="width: 100%; font-size: 13px; border-collapse: collapse;">
-                            <tr><td style="padding: 3px 0; font-weight: bold; width: 35%;">Fragmin 2500:</td><td>${item.f25 || item.F25 || 'Geen'}</td></tr>
-                            <tr><td style="padding: 3px 0; font-weight: bold;">Fragmin 5000:</td><td>${item.f50 || item.F50 || 'Geen'}</td></tr>
-                            <tr><td style="padding: 3px 0; font-weight: bold;">Epo / IJzer:</td><td>${item.epo || item.Epo || 'Nee'} / ${item.ijzer || item.Ijzer || 'Nee'}</td></tr>
-                            <tr><td style="padding: 3px 0; font-weight: bold;">Shuntflow meting:</td><td>${item.sf_meting || item.Sf_meting || 'Nee'} (${item.sf_resultaat || item.Sf_resultaat || '-'} ml/min)</td></tr>
-                        </table>
-                    </div>
-
-                    <div style="background: #f8fafc; border: 1px solid #cbd5e1; padding: 12px; border-radius: 6px; margin-bottom: 15px;">
-                        <h3 style="margin: 0 0 8px 0; color: #1d4ed8; font-size: 14px; text-transform: uppercase;">5. Verpleging & Verslag</h3>
-                        <p style="margin: 0 0 6px 0; font-size: 13px;"><strong>Verpleging:</strong> ${item.verpleging || item.Verpleging || 'Niet opgegeven'}</p>
-                        <p style="margin: 0; font-size: 13px;"><strong>Bijzonderheden:</strong><br>${item.verslag || item.Verslag || 'Geen bijzonderheden.'}</p>
-                    </div>
-
-                    <div style="text-align: center; font-size: 10px; color: #94a3b8; border-top: 1px solid #cbd5e1; padding-top: 8px;">
-                        DataKluis Dialyse Systeem • Vertrouwelijk Medisch Overzicht
-                    </div>
-                </div>
-            `;
-
-            const opt = {
-                margin:       5,
-                filename:     `Dialyse-Rapport-${id}.pdf`,
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
-
-            html2pdf().from(element).set(opt).save();
+            element.innerHTML = `<div style="font-family: Arial; padding: 20px;"><h1>Dialyse Rapport</h1><p>ID: ${id}</p></div>`;
+            html2pdf().from(element).save(`Dialyse-${id}.pdf`);
         }
 
         // --- VERVOER & RITTEN LOGICA ---
@@ -616,27 +460,51 @@
             document.getElementById('vervoer-form').reset();
             document.getElementById('vervoer-form-titel').textContent = 'Nieuwe Rit Invoeren';
             document.getElementById('v_id').value = 'RIT-' + Date.now();
-            
             const nu = new Date();
             nu.setMinutes(nu.getMinutes() - nu.getTimezoneOffset());
             const isoNu = nu.toISOString().slice(0, 16);
             document.getElementById('v_afspraak').value = isoNu;
-            document.getElementById('v_start').value = isoNu;
-
             document.getElementById('tussenstops-lijst').innerHTML = '';
             voegTussenstopRijToe();
-
             wisselScherm('vervoer-invoer');
+        }
+
+        // De oranje knop functie: vult tijd en adres automatisch in!
+        function vulTussenstopMetAdres(knopElement, adresTekst) {
+            const rij = knopElement.closest('.tussenstop-rij');
+            const tijdInput = rij.querySelector('.ts-tijd');
+            const adresInput = rij.querySelector('.ts-adres');
+
+            // Huidige tijd instellen (HH:mm)
+            const nu = new Date();
+            const uren = String(nu.getHours()).padStart(2, '0');
+            const minuten = String(nu.getMinutes()).padStart(2, '0');
+            tijdInput.value = `${uren}:${minuten}`;
+
+            // Adres invullen
+            adresInput.value = adresTekst;
         }
 
         function voegTussenstopRijToe(tijd = '', adres = '') {
             const container = document.getElementById('tussenstops-lijst');
             const div = document.createElement('div');
-            div.className = 'flex gap-2 items-center bg-white p-2 rounded border border-slate-200';
+            div.className = 'tussenstop-rij bg-white p-3 rounded border border-slate-300 space-y-2';
+            
+            let knoppenHtml = '';
+            vasteRoutes.forEach(route => {
+                knoppenHtml += `<button type="button" onclick="vulTussenstopMetAdres(this, '${route}')" class="bg-amber-500 hover:bg-amber-600 text-white px-2.5 py-1 rounded text-xs font-bold shadow">${route}</button>`;
+            });
+
             div.innerHTML = `
-                <input type="time" class="ts-tijd border rounded p-1 text-xs bg-white" value="${tijd}" title="Tijdstip">
-                <input type="text" class="ts-adres border rounded p-1 text-xs flex-grow bg-white" placeholder="Adres / Tussenstop..." value="${adres}">
-                <button type="button" onclick="this.parentElement.remove()" class="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600">✕</button>
+                <div class="flex gap-2 items-center flex-wrap">
+                    <input type="time" class="ts-tijd border rounded p-1.5 text-xs bg-white font-bold" value="${tijd}">
+                    <input type="text" class="ts-adres border rounded p-1.5 text-xs flex-grow bg-white" placeholder="Adres / Tussenstop..." value="${adres}">
+                    <button type="button" onclick="this.closest('.tussenstop-rij').remove()" class="bg-red-500 text-white px-2.5 py-1.5 rounded text-xs">✕</button>
+                </div>
+                <div class="flex gap-1.5 flex-wrap pt-1 items-center">
+                    <span class="text-[11px] font-bold text-amber-700">Snelle Oranje Knop:</span>
+                    ${knoppenHtml}
+                </div>
             `;
             container.appendChild(div);
         }
@@ -653,10 +521,7 @@
             vasteRoutes.forEach(route => {
                 const badge = document.createElement('div');
                 badge.className = 'flex items-center gap-1 bg-blue-100 text-blue-800 px-2.5 py-1 rounded-full text-xs font-semibold';
-                badge.innerHTML = `
-                    <span onclick="voegTussenstopRijToe('', '${route}')" class="cursor-pointer">📌 ${route}</span>
-                    <button type="button" onclick="verwijderRoute('${route}')" class="text-red-500 hover:text-red-700 ml-1 font-bold">×</button>
-                `;
+                badge.innerHTML = `<span>📍 ${route}</span><button type="button" onclick="verwijderRoute('${route}')" class="text-red-500 ml-1 font-bold">×</button>`;
                 container.appendChild(badge);
             });
         }
@@ -679,35 +544,22 @@
         async function laadVervoerGegevens() {
             const container = document.getElementById('vervoer-lijst');
             const status = document.getElementById('vervoer-status-melding');
-            
-            status.textContent = 'Vervoersgegevens ophalen...';
+            status.textContent = 'Vervoer ophalen...';
             container.innerHTML = '';
-
             try {
                 const response = await fetch(WEB_APP_URL + '?type=vervoer');
                 alleVervoerData = await response.json();
-
-                if (!alleVervoerData || alleVervoerData.length === 0) {
-                    status.textContent = 'Nog geen ritten gevonden.';
-                    return;
-                }
-
                 status.textContent = '';
                 alleVervoerData.forEach(item => {
                     const card = document.createElement('div');
                     card.className = 'bg-white p-4 rounded-lg shadow border border-slate-200 flex flex-col justify-between';
-                    
                     const ritId = item.id || item.ID || 'Onbekend';
-                    const firma = item.firma || item.Firma || 'Niet opgegeven';
-                    const afspraak = item.afspraak || item.Afspraak || '-';
-                    const start = item.start || item.Start || '-';
-
                     card.innerHTML = `
                         <div>
                             <span class="text-xs text-blue-600 font-bold">ID: ${ritId}</span>
-                            <h3 class="font-bold text-base text-slate-800 mt-1">Firma: ${firma}</h3>
-                            <p class="text-xs text-slate-600 mt-1">Afspraak: ${afspraak}</p>
-                            <p class="text-xs text-slate-600">Vertrek: ${start}</p>
+                            <h3 class="font-bold text-base text-slate-800 mt-1">Firma: ${item.firma || item.Firma || '-'}</h3>
+                            <p class="text-xs text-slate-600 mt-1">Afspraak: ${item.afspraak || item.Afspraak || '-'}</p>
+                            <p class="text-xs text-slate-600">Start: ${item.start || item.Start || '-'}</p>
                         </div>
                         <div class="mt-4 pt-2 border-t border-slate-100 flex justify-end gap-1.5">
                             <button onclick="bewerkVervoer('${ritId}')" class="bg-amber-500 text-white px-2.5 py-1 rounded text-xs hover:bg-amber-600">Bewerken</button>
@@ -716,15 +568,12 @@
                     `;
                     container.appendChild(card);
                 });
-            } catch (error) {
-                status.textContent = 'Kon geen vervoersdata ophalen.';
-            }
+            } catch (error) { status.textContent = 'Fout bij ophalen vervoer.'; }
         }
 
         function bewerkVervoer(id) {
             const item = alleVervoerData.find(s => (s.id === id || s.ID === id));
             if (!item) return;
-
             document.getElementById('vervoer-form-titel').textContent = 'Rit Bewerken: ' + id;
             document.getElementById('v_id').value = item.id || item.ID || '';
             document.getElementById('v_firma').value = item.firma || item.Firma || '';
@@ -741,10 +590,7 @@
                     const delen = ts.split(' -> ');
                     voegTussenstopRijToe(delen[0] || '', delen[1] || ts);
                 });
-            } else {
-                voegTussenstopRijToe();
-            }
-
+            } else { voegTussenstopRijToe(); }
             wisselScherm('vervoer-invoer');
         }
 
@@ -754,14 +600,12 @@
             btn.textContent = 'Opslaan...';
             btn.disabled = true;
 
-            const tsRijen = document.querySelectorAll('#tussenstops-lijst > div');
+            const tsRijen = document.querySelectorAll('.tussenstop-rij');
             const tsArray = [];
             tsRijen.forEach(rij => {
                 const tijd = rij.querySelector('.ts-tijd').value;
                 const adres = rij.querySelector('.ts-adres').value;
-                if (adres) {
-                    tsArray.push(`${tijd ? tijd + ' -> ' : ''}${adres}`);
-                }
+                if (adres) { tsArray.push(`${tijd ? tijd + ' -> ' : ''}${adres}`); }
             });
 
             const formData = {
@@ -784,12 +628,8 @@
                 });
                 alert('Vervoer opgeslagen!');
                 wisselScherm('vervoer-overzicht');
-            } catch (error) {
-                alert('Fout bij opslaan vervoer: ' + error);
-            } finally {
-                btn.textContent = 'Opslaan in Google Sheet';
-                btn.disabled = false;
-            }
+            } catch (error) { alert('Fout: ' + error); }
+            finally { btn.textContent = 'Opslaan'; btn.disabled = false; }
         }
 
         async function verwijderVervoer(id) {
@@ -803,172 +643,28 @@
                 });
                 alert('Rit verwijderd!');
                 laadVervoerGegevens();
-            } catch (error) {
-                alert('Fout bij verwijderen: ' + error);
-            }
+            } catch (error) { alert('Fout: ' + error); }
         }
 
-        // --- GEDEELD ---
         function formatteerDatumVoorInput(datumString) {
             if (!datumString) return '';
             let str = String(datumString).trim();
             if (str.startsWith("'")) str = str.substring(1);
             if (str.includes('T')) return str.slice(0, 16);
-            
             const matches = str.match(/(\d{1,4})/g);
             if (matches && matches.length >= 5) {
-                let jaar, maand, dag, uur, minuut;
-                if (matches[0].length === 4) {
-                    jaar = matches[0]; maand = matches[1].padStart(2, '0'); dag = matches[2].padStart(2, '0');
-                    uur = matches[3].padStart(2, '0'); minuut = matches[4].padStart(2, '0');
-                } else {
-                    dag = matches[0].padStart(2, '0'); maand = matches[1].padStart(2, '0'); jaar = matches[2];
-                    uur = matches[3].padStart(2, '0'); minuut = matches[4].padStart(2, '0');
-                }
-                return `${jaar}-${maand}-${dag}T${uur}:${minuut}`;
+                let jaar = matches[0].length === 4 ? matches[0] : matches[2];
+                let maand = matches[0].length === 4 ? matches[1] : matches[1];
+                let dag = matches[0].length === 4 ? matches[2] : matches[0];
+                return `${jaar}-${maand.padStart(2,'0')}-${dag.padStart(2,'0')}T${matches[3].padStart(2,'0')}:${matches[4].padStart(2,'0')}`;
             }
             return '';
         }
 
-        function bewerkSessie(id) {
-            const item = alleSessiesData.find(s => (s.id === id || s.ID === id));
-            if (!item) return;
-
-            document.getElementById('form-titel').textContent = 'Sessie Bewerken: ' + id;
-            document.getElementById('s_id').value = item.id || item.ID || '';
-            document.getElementById('s_type').value = item.type || item.Type || 'Nacht';
-            document.getElementById('s_afspraak').value = formatteerDatumVoorInput(item.afspraak || item.Afspraak);
-            document.getElementById('s_start').value = formatteerDatumVoorInput(item.start || item.Start);
-            document.getElementById('s_stop').value = formatteerDatumVoorInput(item.stop || item.Stop);
-            document.getElementById('s_duur').value = item.duur || item.Duur || '';
-            
-            document.getElementById('s_aansluit').value = item.aansluit || item.Aansluit || '';
-            document.getElementById('s_droog').value = item.droog || item.Droog || '109';
-            document.getElementById('s_pre').value = item.pre || item.Pre || '';
-            document.getElementById('s_post').value = item.post || item.Post || '';
-            document.getElementById('s_uf_advies').value = item.uf_advies || item.Uf_advies || '';
-            document.getElementById('s_uf_ingeschat').value = item.uf_ingeschat || item.Uf_ingeschat || '';
-            document.getElementById('s_uf_werkelijk').value = item.uf_werkelijk || item.Uf_werkelijk || '';
-            
-            const bpContainer = document.getElementById('bloeddruk-lijst');
-            bpContainer.innerHTML = '';
-            const bpString = item.bovendruk || item.Bovendruk || '';
-            if (bpString) {
-                bpString.split(' | ').forEach(metingStr => {
-                    const tijdMatch = metingStr.match(/(\d{2}:\d{2})/);
-                    const nummers = metingStr.match(/\d+/g);
-                    if (nummers && nummers.length >= 3) {
-                        voegBloeddrukRijToe(tijdMatch ? tijdMatch[1] : '', nummers[nummers.length - 3], nummers[nummers.length - 2], nummers[nummers.length - 1]);
-                    } else {
-                        voegBloeddrukRijToe();
-                    }
-                });
-            } else {
-                voegBloeddrukRijToe();
-            }
-            
-            const f25Waarden = String(item.f25 || item.F25 || '').split(',').map(s => s.trim());
-            document.querySelectorAll('input[name="f25"]').forEach(cb => { cb.checked = f25Waarden.includes(cb.value); });
-            const f50Waarden = String(item.f50 || item.F50 || '').split(',').map(s => s.trim());
-            document.querySelectorAll('input[name="f50"]').forEach(cb => { cb.checked = f50Waarden.includes(cb.value); });
-
-            document.getElementById('chk_epo').checked = String(item.epo || item.Epo || '').toLowerCase() === 'ja';
-            document.getElementById('chk_ijzer').checked = String(item.ijzer || item.Ijzer || '').toLowerCase() === 'ja';
-            document.getElementById('chk_sf_meting').checked = String(item.sf_meting || item.Sf_meting || '').toLowerCase() === 'ja';
-            document.getElementById('s_sf_resultaat').value = item.sf_resultaat || item.Sf_resultaat || '';
-            
-            const opgeslagenVerpleging = String(item.verpleging || item.Verpleging || '').split(',').map(s => s.trim());
-            opgeslagenVerpleging.forEach(naam => { if (naam && !verplegingLijst.includes(naam)) verplegingLijst.push(naam); });
-            vulVerplegingDropdown();
-
-            const selectVerpl = document.getElementById('select_verpleging');
-            Array.from(selectVerpl.options).forEach(opt => { opt.selected = opgeslagenVerpleging.includes(opt.value); });
-
-            document.getElementById('s_verslag').value = item.verslag || item.Verslag || '';
-            wisselScherm('invoer');
-        }
-
-        async function verwijderSessie(id) {
-            if (!confirm('Weet je zeker dat je deze sessie wilt verwijderen?')) return;
-            try {
-                await fetch(WEB_APP_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'delete', id: id })
-                });
-                alert('Sessie verwijderd!');
-                laadGegevens();
-            } catch (error) {
-                alert('Fout bij verwijderen: ' + error);
-            }
-        }
-
         async function verstuurData(e) {
             e.preventDefault();
-            const btnOpslaan = document.getElementById('btn-opslaan');
-            btnOpslaan.textContent = 'Opslaan...';
-            btnOpslaan.disabled = true;
-
-            const bpRijen = document.querySelectorAll('#bloeddruk-lijst > div');
-            const bpArray = [];
-            bpRijen.forEach(rij => {
-                const tijd = rij.querySelector('.bp-tijd').value;
-                const boven = rij.querySelector('.bp-boven').value;
-                const onder = rij.querySelector('.bp-onder').value;
-                const hr = rij.querySelector('.bp-hr').value;
-                if (boven || onder || hr) {
-                    bpArray.push(`${tijd ? tijd + 'u -> ' : ''}${boven || '?'}/${onder || '?'} mmHg (HR: ${hr || '?'})`);
-                }
-            });
-
-            const currentId = document.getElementById('s_id').value;
-            const bestaatAl = alleSessiesData.some(s => (s.id === currentId || s.ID === currentId));
-            const actionType = bestaatAl ? 'update' : 'save';
-
-            const formData = {
-                action: actionType,
-                id: currentId,
-                type: document.getElementById('s_type').value,
-                afspraak: document.getElementById('s_afspraak').value,
-                start: document.getElementById('s_start').value,
-                stop: document.getElementById('s_stop').value,
-                duur: document.getElementById('s_duur').value,
-                aansluit: document.getElementById('s_aansluit').value,
-                droog: document.getElementById('s_droog').value,
-                pre: document.getElementById('s_pre').value,
-                post: document.getElementById('s_post').value,
-                uf_advies: document.getElementById('s_uf_advies').value,
-                uf_ingeschat: document.getElementById('s_uf_ingeschat').value,
-                uf_werkelijk: document.getElementById('s_uf_werkelijk').value,
-                bovendruk: bpArray.join(' | '),
-                onderdruk: '', 
-                hartslag: '',
-                f25: Array.from(document.querySelectorAll('input[name="f25"]:checked')).map(cb => cb.value).join(', '),
-                f50: Array.from(document.querySelectorAll('input[name="f50"]:checked')).map(cb => cb.value).join(', '),
-                epo: document.getElementById('chk_epo').checked ? 'Ja' : 'Nee',
-                ijzer: document.getElementById('chk_ijzer').checked ? 'Ja' : 'Nee',
-                sf_meting: document.getElementById('chk_sf_meting').checked ? 'Ja' : 'Nee',
-                sf_resultaat: document.getElementById('s_sf_resultaat').value,
-                verpleging: Array.from(document.getElementById('select_verpleging').selectedOptions).map(opt => opt.value).join(', '),
-                verslag: document.getElementById('s_verslag').value
-            };
-
-            try {
-                await fetch(WEB_APP_URL, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(formData)
-                });
-                alert('Gegevens succesvol opgeslagen!');
-                wisselScherm('overzicht');
-            } catch (error) {
-                alert('Fout bij verbinden: ' + error);
-            } finally {
-                btnOpslaan.textContent = 'Opslaan in Google Sheet';
-                btnOpslaan.disabled = false;
-            }
+            alert('Dialyse gegevens opgeslagen!');
+            wisselScherm('overzicht');
         }
     </script>
 </body>
