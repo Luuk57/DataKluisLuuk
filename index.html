@@ -3,10 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DataKluis - Dialyse Dashboard</title>
+    <title>DataKluis - Dialyse & Vervoer Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- html2pdf bibliotheek voor professionele PDF export -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- PWA Manifest voor installatie op beginscherm -->
+    <link rel="manifest" href="data:application/manifest+json;charset=utf-8,%7B%22name%22%3A%22DataKluis%20Dialyse%22%2C%22short_name%22%3A%22DataKluis%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23f1f5f9%22%2C%22theme_color%22%3A%22%231d4ed8%22%7D">
 </head>
 <body class="bg-slate-100 min-h-screen flex flex-col">
 
@@ -16,7 +18,9 @@
             <h1 class="text-xl font-bold">DataKluis • Dialyse Luuk</h1>
             <div class="flex flex-wrap gap-2 mt-2 sm:mt-0">
                 <button onclick="wisselScherm('overzicht')" id="btn-overzicht" class="px-3 py-1.5 rounded bg-blue-900 text-sm font-medium">Overzicht</button>
-                <button onclick="nieuweMetingFormulier()" id="btn-invoer" class="px-3 py-1.5 rounded hover:bg-blue-600 text-sm font-medium">Nieuwe Meting</button>
+                <button onclick="wisselScherm('vervoer-overzicht')" id="btn-vervoer-overzicht" class="px-3 py-1.5 rounded hover:bg-blue-600 text-sm font-medium">Vervoer / Ritten</button>
+                <button onclick="nieuweMetingFormulier()" id="btn-invoer" class="px-3 py-1.5 rounded hover:bg-blue-600 text-sm font-medium">＋ Dialyse Meting</button>
+                <button onclick="nieuwVervoerFormulier()" id="btn-vervoer-invoer" class="px-3 py-1.5 rounded hover:bg-blue-600 text-sm font-medium">＋ Rit Toevoegen</button>
             </div>
         </div>
     </nav>
@@ -24,7 +28,7 @@
     <!-- Hoofdinhoud -->
     <main class="container mx-auto px-4 py-6 flex-grow">
 
-        <!-- SCHERM 1: OVERZICHT -->
+        <!-- SCHERM 1: DIALYSE OVERZICHT -->
         <section id="scherm-overzicht" class="space-y-6">
             <div class="flex justify-between items-center">
                 <h2 class="text-2xl font-semibold text-slate-800">Behandelingen Overzicht</h2>
@@ -38,7 +42,21 @@
             </div>
         </section>
 
-        <!-- SCHERM 2: INVOER / BEWERKEN -->
+        <!-- SCHERM 1.5: VERVOER & RITTEN OVERZICHT -->
+        <section id="scherm-vervoer-overzicht" class="hidden space-y-6">
+            <div class="flex justify-between items-center">
+                <h2 class="text-2xl font-semibold text-slate-800">Vervoer & Ritten Overzicht</h2>
+                <button onclick="nieuwVervoerFormulier()" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700">＋ Rit Toevoegen</button>
+            </div>
+
+            <div id="vervoer-status-melding" class="text-slate-500 italic">Vervoersgegevens ophalen...</div>
+            
+            <div id="vervoer-lijst" class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                <!-- Dynamische vervoersblokken -->
+            </div>
+        </section>
+
+        <!-- SCHERM 2: DIALYSE INVOER / BEWERKEN -->
         <section id="scherm-invoer" class="hidden max-w-3xl mx-auto bg-white p-6 md:p-8 rounded-xl shadow-md border border-slate-200">
             <h2 id="form-titel" class="text-2xl font-semibold text-slate-800 mb-2">Nieuwe Sessie Invoeren</h2>
             <p class="text-xs text-slate-500 mb-6">Alle velden zijn optioneel. Gekoppeld aan je Google Sheets tabbladen.</p>
@@ -123,15 +141,13 @@
                     </div>
                 </div>
 
-                <!-- 3. Bloeddruk & Hartslag (Meerdere Metingen) -->
+                <!-- 3. Bloeddruk & Hartslag -->
                 <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-3">
                     <div class="flex justify-between items-center">
                         <h3 class="text-sm font-bold text-blue-700 uppercase">3. Bloeddruk & Hartslag (Meerdere Metingen)</h3>
                         <button type="button" onclick="voegBloeddrukRijToe()" class="bg-blue-600 text-white px-2.5 py-1 rounded text-xs hover:bg-blue-700">＋ Meting Toevoegen</button>
                     </div>
-                    <div id="bloeddruk-lijst" class="space-y-2">
-                        <!-- Dynamische rijen voor bloeddruk -->
-                    </div>
+                    <div id="bloeddruk-lijst" class="space-y-2"></div>
                 </div>
 
                 <!-- 4. Toedingeningen -->
@@ -177,7 +193,7 @@
                     <h3 class="text-sm font-bold text-blue-700 uppercase">5. Verpleging & Verslag</h3>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-xs font-medium text-slate-600 mb-1">Verpleging (Meerdere selecteerbaar)</label>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Verpleging</label>
                             <select id="select_verpleging" multiple class="w-full border rounded p-2 text-sm bg-white h-28" title="Selecteer verpleging"></select>
                             <div class="flex gap-2 mt-2">
                                 <input type="text" id="nieuwe_naam" placeholder="Nieuwe naam..." class="border rounded p-1 text-xs flex-grow bg-white">
@@ -199,6 +215,87 @@
             </form>
         </section>
 
+        <!-- SCHERM 3: VERVOER INVOER / BEWERKEN -->
+        <section id="scherm-vervoer-invoer" class="hidden max-w-3xl mx-auto bg-white p-6 md:p-8 rounded-xl shadow-md border border-slate-200">
+            <h2 id="vervoer-form-titel" class="text-2xl font-semibold text-slate-800 mb-2">Nieuwe Rit Invoeren</h2>
+            <p class="text-xs text-slate-500 mb-6">Plan je vervoer, afspraken en tussenstops.</p>
+            
+            <form id="vervoer-form" onsubmit="verstuurVervoerData(event)" class="space-y-6">
+                
+                <input type="hidden" id="v_id">
+
+                <!-- Snelle Route Knoppen & Beheer -->
+                <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-3">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-sm font-bold text-blue-700 uppercase">Snelle Routes & Firma</h3>
+                        <div class="flex gap-2">
+                            <input type="text" id="nieuwe-route-naam" placeholder="Nieuwe route (bijv. Ziekenhuis)..." class="border rounded p-1 text-xs bg-white">
+                            <button type="button" onclick="voegRouteToe()" class="bg-emerald-600 text-white px-2 py-1 rounded text-xs hover:bg-emerald-700">＋ Route Knop Maak</button>
+                        </div>
+                    </div>
+                    <div id="route-knoppen-container" class="flex flex-wrap gap-2 pt-1">
+                        <!-- Dynamische route tegels -->
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1">Vervoersfirma / Taxibedrijf</label>
+                        <input type="text" id="v_firma" placeholder="Bijv. Connexxion / Taxi Centrale" class="w-full border rounded p-2 text-sm bg-white">
+                    </div>
+                </div>
+
+                <!-- Tijden met Grote Knoppen -->
+                <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-4">
+                    <h3 class="text-sm font-bold text-blue-700 uppercase">Rittijden</h3>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <label class="text-xs font-medium text-slate-600">Afspraak Datum & Tijd</label>
+                                <button type="button" onclick="stelNuIn('v_afspraak')" class="bg-blue-600 text-white px-2 py-0.5 rounded text-xs hover:bg-blue-700 font-bold">Nu</button>
+                            </div>
+                            <input type="datetime-local" id="v_afspraak" class="w-full border rounded p-2 text-sm bg-white font-bold">
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <label class="text-xs font-medium text-slate-600">Start / Vertrektijd</label>
+                                <button type="button" onclick="stelNuIn('v_start')" class="bg-blue-600 text-white px-2 py-0.5 rounded text-xs hover:bg-blue-700 font-bold">Nu</button>
+                            </div>
+                            <input type="datetime-local" id="v_start" class="w-full border rounded p-2 text-sm bg-white">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <div class="flex justify-between items-center mb-1">
+                                <label class="text-xs font-medium text-slate-600">Stop / Aankomsttijd</label>
+                                <button type="button" onclick="stelNuIn('v_stop')" class="bg-blue-600 text-white px-2 py-0.5 rounded text-xs hover:bg-blue-700 font-bold">Nu</button>
+                            </div>
+                            <input type="datetime-local" id="v_stop" class="w-full border rounded p-2 text-sm bg-white">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tussenstops (Meerdere rijen met tijd + adres) -->
+                <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-3">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-sm font-bold text-blue-700 uppercase">Tussenstops</h3>
+                        <button type="button" onclick="voegTussenstopRijToe()" class="bg-blue-600 text-white px-2.5 py-1 rounded text-xs hover:bg-blue-700">＋ Tussenstop Toevoegen</button>
+                    </div>
+                    <div id="tussenstops-lijst" class="space-y-2"></div>
+                </div>
+
+                <!-- Opmerkingen -->
+                <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                    <h3 class="text-sm font-bold text-blue-700 uppercase mb-2">Opmerkingen & Bijzonderheden</h3>
+                    <textarea id="v_opmerking" rows="3" class="w-full border rounded p-2 text-sm bg-white" placeholder="Bijv. rolstoelvervoer, bijzonderheden onderweg..."></textarea>
+                </div>
+
+                <div class="flex justify-end space-x-3 pt-2">
+                    <button type="button" onclick="wisselScherm('vervoer-overzicht')" class="bg-slate-200 px-4 py-2 rounded text-sm font-medium">Annuleren</button>
+                    <button type="submit" id="btn-vervoer-opslaan" class="bg-blue-600 text-white px-5 py-2 rounded text-sm font-medium hover:bg-blue-700 shadow">Opslaan in Google Sheet</button>
+                </div>
+            </form>
+        </section>
+
     </main>
 
     <footer class="bg-white border-t py-3 text-center text-xs text-slate-500">
@@ -208,16 +305,46 @@
     <!-- JavaScript Logica -->
     <script>
         let verplegingLijst = ["Jan de Vries", "Sanne Bakker", "Mohammed Ali", "Lisa Jansen"];
+        let vasteRoutes = ["Huis ➔ Dialyse", "Dialyse ➔ Huis", "Huis ➔ Ziekenhuis", "Apotheek"];
         let handmatigeStartIngesteld = false;
         let alleSessiesData = [];
+        let alleVervoerData = [];
         const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwMKP8tdX7OhNzbWimvqonBSZUxX8zhqif7ftkTkRXY6-QUbAwKOUTbRGKo55tg8jlX/exec';
 
         window.addEventListener('DOMContentLoaded', () => {
             vulVerplegingDropdown();
             laadGegevens();
-            voegBloeddrukRijToe(); // Start met 1 lege bloeddrukrij
+            laadVervoerGegevens();
+            renderRouteKnoppen();
+            voegBloeddrukRijToe();
+            voegTussenstopRijToe();
         });
 
+        function wisselScherm(scherm) {
+            document.getElementById('scherm-overzicht').classList.add('hidden');
+            document.getElementById('scherm-vervoer-overzicht').classList.add('hidden');
+            document.getElementById('scherm-invoer').classList.add('hidden');
+            document.getElementById('scherm-vervoer-invoer').classList.add('hidden');
+
+            document.getElementById('btn-overzicht').classList.remove('bg-blue-900');
+            document.getElementById('btn-vervoer-overzicht').classList.remove('bg-blue-900');
+
+            if (scherm === 'overzicht') {
+                document.getElementById('scherm-overzicht').classList.remove('hidden');
+                document.getElementById('btn-overzicht').classList.add('bg-blue-900');
+                laadGegevens();
+            } else if (scherm === 'vervoer-overzicht') {
+                document.getElementById('scherm-vervoer-overzicht').classList.remove('hidden');
+                document.getElementById('btn-vervoer-overzicht').classList.add('bg-blue-900');
+                laadVervoerGegevens();
+            } else if (scherm === 'invoer') {
+                document.getElementById('scherm-invoer').classList.remove('hidden');
+            } else if (scherm === 'vervoer-invoer') {
+                document.getElementById('scherm-vervoer-invoer').classList.remove('hidden');
+            }
+        }
+
+        // --- DIALYSE LOGICA ---
         function nieuweMetingFormulier() {
             document.getElementById('datakluis-form').reset();
             document.getElementById('form-titel').textContent = 'Nieuwe Sessie Invoeren';
@@ -235,7 +362,6 @@
             wisselScherm('invoer');
         }
 
-        // Functies voor meerdere bloeddrukmetingen
         function voegBloeddrukRijToe(tijd = '', bovendruk = '', onderdruk = '', hartslag = '') {
             const container = document.getElementById('bloeddruk-lijst');
             const div = document.createElement('div');
@@ -345,17 +471,6 @@
             }
         }
 
-        function wisselScherm(scherm) {
-            if (scherm === 'overzicht') {
-                document.getElementById('scherm-overzicht').classList.remove('hidden');
-                document.getElementById('scherm-invoer').classList.add('hidden');
-                laadGegevens();
-            } else {
-                document.getElementById('scherm-overzicht').classList.add('hidden');
-                document.getElementById('scherm-invoer').classList.remove('hidden');
-            }
-        }
-
         async function laadGegevens() {
             const container = document.getElementById('sessie-lijst');
             const status = document.getElementById('status-melding');
@@ -406,7 +521,6 @@
             }
         }
 
-        // Directe PDF generatie met meerdere bloeddrukmetingen
         function genereerPdf(id) {
             const item = alleSessiesData.find(s => (s.id === id || s.ID === id));
             if (!item) {
@@ -414,7 +528,6 @@
                 return;
             }
 
-            // Bloeddruk string opsplitsen voor nette weergave in PDF
             let bpHtml = '';
             const bpString = item.bovendruk || item.Bovendruk || '';
             if (bpString) {
@@ -498,6 +611,204 @@
             html2pdf().from(element).set(opt).save();
         }
 
+        // --- VERVOER & RITTEN LOGICA ---
+        function nieuwVervoerFormulier() {
+            document.getElementById('vervoer-form').reset();
+            document.getElementById('vervoer-form-titel').textContent = 'Nieuwe Rit Invoeren';
+            document.getElementById('v_id').value = 'RIT-' + Date.now();
+            
+            const nu = new Date();
+            nu.setMinutes(nu.getMinutes() - nu.getTimezoneOffset());
+            const isoNu = nu.toISOString().slice(0, 16);
+            document.getElementById('v_afspraak').value = isoNu;
+            document.getElementById('v_start').value = isoNu;
+
+            document.getElementById('tussenstops-lijst').innerHTML = '';
+            voegTussenstopRijToe();
+
+            wisselScherm('vervoer-invoer');
+        }
+
+        function voegTussenstopRijToe(tijd = '', adres = '') {
+            const container = document.getElementById('tussenstops-lijst');
+            const div = document.createElement('div');
+            div.className = 'flex gap-2 items-center bg-white p-2 rounded border border-slate-200';
+            div.innerHTML = `
+                <input type="time" class="ts-tijd border rounded p-1 text-xs bg-white" value="${tijd}" title="Tijdstip">
+                <input type="text" class="ts-adres border rounded p-1 text-xs flex-grow bg-white" placeholder="Adres / Tussenstop..." value="${adres}">
+                <button type="button" onclick="this.parentElement.remove()" class="bg-red-500 text-white px-2 py-1 rounded text-xs hover:bg-red-600">✕</button>
+            `;
+            container.appendChild(div);
+        }
+
+        function stelNuIn(elementId) {
+            const nu = new Date();
+            nu.setMinutes(nu.getMinutes() - nu.getTimezoneOffset());
+            document.getElementById(elementId).value = nu.toISOString().slice(0, 16);
+        }
+
+        function renderRouteKnoppen() {
+            const container = document.getElementById('route-knoppen-container');
+            container.innerHTML = '';
+            vasteRoutes.forEach(route => {
+                const badge = document.createElement('div');
+                badge.className = 'flex items-center gap-1 bg-blue-100 text-blue-800 px-2.5 py-1 rounded-full text-xs font-semibold';
+                badge.innerHTML = `
+                    <span onclick="voegTussenstopRijToe('', '${route}')" class="cursor-pointer">📌 ${route}</span>
+                    <button type="button" onclick="verwijderRoute('${route}')" class="text-red-500 hover:text-red-700 ml-1 font-bold">×</button>
+                `;
+                container.appendChild(badge);
+            });
+        }
+
+        function voegRouteToe() {
+            const input = document.getElementById('nieuwe-route-naam');
+            const routeNaam = input.value.trim();
+            if (routeNaam && !vasteRoutes.includes(routeNaam)) {
+                vasteRoutes.push(routeNaam);
+                renderRouteKnoppen();
+                input.value = '';
+            }
+        }
+
+        function verwijderRoute(routeNaam) {
+            vasteRoutes = vasteRoutes.filter(r => r !== routeNaam);
+            renderRouteKnoppen();
+        }
+
+        async function laadVervoerGegevens() {
+            const container = document.getElementById('vervoer-lijst');
+            const status = document.getElementById('vervoer-status-melding');
+            
+            status.textContent = 'Vervoersgegevens ophalen...';
+            container.innerHTML = '';
+
+            try {
+                const response = await fetch(WEB_APP_URL + '?type=vervoer');
+                alleVervoerData = await response.json();
+
+                if (!alleVervoerData || alleVervoerData.length === 0) {
+                    status.textContent = 'Nog geen ritten gevonden.';
+                    return;
+                }
+
+                status.textContent = '';
+                alleVervoerData.forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = 'bg-white p-4 rounded-lg shadow border border-slate-200 flex flex-col justify-between';
+                    
+                    const ritId = item.id || item.ID || 'Onbekend';
+                    const firma = item.firma || item.Firma || 'Niet opgegeven';
+                    const afspraak = item.afspraak || item.Afspraak || '-';
+                    const start = item.start || item.Start || '-';
+
+                    card.innerHTML = `
+                        <div>
+                            <span class="text-xs text-blue-600 font-bold">ID: ${ritId}</span>
+                            <h3 class="font-bold text-base text-slate-800 mt-1">Firma: ${firma}</h3>
+                            <p class="text-xs text-slate-600 mt-1">Afspraak: ${afspraak}</p>
+                            <p class="text-xs text-slate-600">Vertrek: ${start}</p>
+                        </div>
+                        <div class="mt-4 pt-2 border-t border-slate-100 flex justify-end gap-1.5">
+                            <button onclick="bewerkVervoer('${ritId}')" class="bg-amber-500 text-white px-2.5 py-1 rounded text-xs hover:bg-amber-600">Bewerken</button>
+                            <button onclick="verwijderVervoer('${ritId}')" class="bg-red-500 text-white px-2.5 py-1 rounded text-xs hover:bg-red-600">Verwijderen</button>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            } catch (error) {
+                status.textContent = 'Kon geen vervoersdata ophalen.';
+            }
+        }
+
+        function bewerkVervoer(id) {
+            const item = alleVervoerData.find(s => (s.id === id || s.ID === id));
+            if (!item) return;
+
+            document.getElementById('vervoer-form-titel').textContent = 'Rit Bewerken: ' + id;
+            document.getElementById('v_id').value = item.id || item.ID || '';
+            document.getElementById('v_firma').value = item.firma || item.Firma || '';
+            document.getElementById('v_afspraak').value = formatteerDatumVoorInput(item.afspraak || item.Afspraak);
+            document.getElementById('v_start').value = formatteerDatumVoorInput(item.start || item.Start);
+            document.getElementById('v_stop').value = formatteerDatumVoorInput(item.stop || item.Stop);
+            document.getElementById('v_opmerking').value = item.opmerking || item.Opmerking || '';
+
+            const tsContainer = document.getElementById('tussenstops-lijst');
+            tsContainer.innerHTML = '';
+            const tsString = item.tussenstops || item.Tussenstops || '';
+            if (tsString) {
+                tsString.split(' | ').forEach(ts => {
+                    const delen = ts.split(' -> ');
+                    voegTussenstopRijToe(delen[0] || '', delen[1] || ts);
+                });
+            } else {
+                voegTussenstopRijToe();
+            }
+
+            wisselScherm('vervoer-invoer');
+        }
+
+        async function verstuurVervoerData(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btn-vervoer-opslaan');
+            btn.textContent = 'Opslaan...';
+            btn.disabled = true;
+
+            const tsRijen = document.querySelectorAll('#tussenstops-lijst > div');
+            const tsArray = [];
+            tsRijen.forEach(rij => {
+                const tijd = rij.querySelector('.ts-tijd').value;
+                const adres = rij.querySelector('.ts-adres').value;
+                if (adres) {
+                    tsArray.push(`${tijd ? tijd + ' -> ' : ''}${adres}`);
+                }
+            });
+
+            const formData = {
+                action: 'save-vervoer',
+                id: document.getElementById('v_id').value,
+                firma: document.getElementById('v_firma').value,
+                afspraak: document.getElementById('v_afspraak').value,
+                start: document.getElementById('v_start').value,
+                stop: document.getElementById('v_stop').value,
+                tussenstops: tsArray.join(' | '),
+                opmerking: document.getElementById('v_opmerking').value
+            };
+
+            try {
+                await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                alert('Vervoer opgeslagen!');
+                wisselScherm('vervoer-overzicht');
+            } catch (error) {
+                alert('Fout bij opslaan vervoer: ' + error);
+            } finally {
+                btn.textContent = 'Opslaan in Google Sheet';
+                btn.disabled = false;
+            }
+        }
+
+        async function verwijderVervoer(id) {
+            if (!confirm('Weet je zeker dat je deze rit wilt verwijderen?')) return;
+            try {
+                await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'delete-vervoer', id: id })
+                });
+                alert('Rit verwijderd!');
+                laadVervoerGegevens();
+            } catch (error) {
+                alert('Fout bij verwijderen: ' + error);
+            }
+        }
+
+        // --- GEDEELD ---
         function formatteerDatumVoorInput(datumString) {
             if (!datumString) return '';
             let str = String(datumString).trim();
@@ -524,7 +835,6 @@
             if (!item) return;
 
             document.getElementById('form-titel').textContent = 'Sessie Bewerken: ' + id;
-            
             document.getElementById('s_id').value = item.id || item.ID || '';
             document.getElementById('s_type').value = item.type || item.Type || 'Nacht';
             document.getElementById('s_afspraak').value = formatteerDatumVoorInput(item.afspraak || item.Afspraak);
@@ -540,22 +850,15 @@
             document.getElementById('s_uf_ingeschat').value = item.uf_ingeschat || item.Uf_ingeschat || '';
             document.getElementById('s_uf_werkelijk').value = item.uf_werkelijk || item.Uf_werkelijk || '';
             
-            // Meerdere bloeddrukmetingen inladen bij bewerken
             const bpContainer = document.getElementById('bloeddruk-lijst');
             bpContainer.innerHTML = '';
             const bpString = item.bovendruk || item.Bovendruk || '';
             if (bpString) {
                 bpString.split(' | ').forEach(metingStr => {
-                    // Verwacht formaat: "22:30 -> 120/80 (HR: 70)" of soortgelijk
-                    // We parsen dit netjes terug naar de invoervelden
                     const tijdMatch = metingStr.match(/(\d{2}:\d{2})/);
                     const nummers = metingStr.match(/\d+/g);
                     if (nummers && nummers.length >= 3) {
-                        const tijd = tijdMatch ? tijdMatch[1] : '';
-                        const boven = nummers[nummers.length - 3];
-                        const onder = nummers[nummers.length - 2];
-                        const hr = nummers[nummers.length - 1];
-                        voegBloeddrukRijToe(tijd, boven, onder, hr);
+                        voegBloeddrukRijToe(tijdMatch ? tijdMatch[1] : '', nummers[nummers.length - 3], nummers[nummers.length - 2], nummers[nummers.length - 1]);
                     } else {
                         voegBloeddrukRijToe();
                     }
@@ -565,14 +868,9 @@
             }
             
             const f25Waarden = String(item.f25 || item.F25 || '').split(',').map(s => s.trim());
-            document.querySelectorAll('input[name="f25"]').forEach(cb => {
-                cb.checked = f25Waarden.includes(cb.value);
-            });
-
+            document.querySelectorAll('input[name="f25"]').forEach(cb => { cb.checked = f25Waarden.includes(cb.value); });
             const f50Waarden = String(item.f50 || item.F50 || '').split(',').map(s => s.trim());
-            document.querySelectorAll('input[name="f50"]').forEach(cb => {
-                cb.checked = f50Waarden.includes(cb.value);
-            });
+            document.querySelectorAll('input[name="f50"]').forEach(cb => { cb.checked = f50Waarden.includes(cb.value); });
 
             document.getElementById('chk_epo').checked = String(item.epo || item.Epo || '').toLowerCase() === 'ja';
             document.getElementById('chk_ijzer').checked = String(item.ijzer || item.Ijzer || '').toLowerCase() === 'ja';
@@ -580,26 +878,18 @@
             document.getElementById('s_sf_resultaat').value = item.sf_resultaat || item.Sf_resultaat || '';
             
             const opgeslagenVerpleging = String(item.verpleging || item.Verpleging || '').split(',').map(s => s.trim());
-            opgeslagenVerpleging.forEach(naam => {
-                if (naam && !verplegingLijst.includes(naam)) {
-                    verplegingLijst.push(naam);
-                }
-            });
+            opgeslagenVerpleging.forEach(naam => { if (naam && !verplegingLijst.includes(naam)) verplegingLijst.push(naam); });
             vulVerplegingDropdown();
 
             const selectVerpl = document.getElementById('select_verpleging');
-            Array.from(selectVerpl.options).forEach(opt => {
-                opt.selected = opgeslagenVerpleging.includes(opt.value);
-            });
+            Array.from(selectVerpl.options).forEach(opt => { opt.selected = opgeslagenVerpleging.includes(opt.value); });
 
             document.getElementById('s_verslag').value = item.verslag || item.Verslag || '';
-
             wisselScherm('invoer');
         }
 
         async function verwijderSessie(id) {
             if (!confirm('Weet je zeker dat je deze sessie wilt verwijderen?')) return;
-
             try {
                 await fetch(WEB_APP_URL, {
                     method: 'POST',
@@ -616,12 +906,10 @@
 
         async function verstuurData(e) {
             e.preventDefault();
-
             const btnOpslaan = document.getElementById('btn-opslaan');
             btnOpslaan.textContent = 'Opslaan...';
             btnOpslaan.disabled = true;
 
-            // Verzamel alle bloeddrukmetingen uit de rijen
             const bpRijen = document.querySelectorAll('#bloeddruk-lijst > div');
             const bpArray = [];
             bpRijen.forEach(rij => {
@@ -633,7 +921,6 @@
                     bpArray.push(`${tijd ? tijd + 'u -> ' : ''}${boven || '?'}/${onder || '?'} mmHg (HR: ${hr || '?'})`);
                 }
             });
-            const bloeddrukDataTekst = bpArray.join(' | ');
 
             const currentId = document.getElementById('s_id').value;
             const bestaatAl = alleSessiesData.some(s => (s.id === currentId || s.ID === currentId));
@@ -654,7 +941,7 @@
                 uf_advies: document.getElementById('s_uf_advies').value,
                 uf_ingeschat: document.getElementById('s_uf_ingeschat').value,
                 uf_werkelijk: document.getElementById('s_uf_werkelijk').value,
-                bovendruk: bloeddrukDataTekst, // Bevat nu alle metingen gebundeld
+                bovendruk: bpArray.join(' | '),
                 onderdruk: '', 
                 hartslag: '',
                 f25: Array.from(document.querySelectorAll('input[name="f25"]:checked')).map(cb => cb.value).join(', '),
@@ -674,11 +961,10 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(formData)
                 });
-                
-                alert('Gegevens succesvol opgeslagen in je Google Sheets DataKluis!');
+                alert('Gegevens succesvol opgeslagen!');
                 wisselScherm('overzicht');
             } catch (error) {
-                alert('Fout bij verbinden met Google Sheets: ' + error);
+                alert('Fout bij verbinden: ' + error);
             } finally {
                 btnOpslaan.textContent = 'Opslaan in Google Sheet';
                 btnOpslaan.disabled = false;
